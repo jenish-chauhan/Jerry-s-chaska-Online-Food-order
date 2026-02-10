@@ -31,7 +31,7 @@ Desktop.ini
 *.swp
 *.swo
 *~
-
+README-FOR-DOCKER.MD
 # ---------- Docker ----------
 # Do NOT push .dockerignore (they are fine to push, but .env must not be)
 
