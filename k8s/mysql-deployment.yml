@@ -1,0 +1,50 @@
+# =============================================================================
+# MySQL Deployment
+# Runs a single MySQL 8.0 instance with persistent storage
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  labels:
+    app: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: <your-dockerhub-username>/jerrys-mysql:latest
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "jerrys-secret-password"
+            - name: MYSQL_DATABASE
+              value: "jerrys_chaska"
+            - name: MYSQL_USER
+              value: "jerrys_user"
+            - name: MYSQL_PASSWORD
+              value: "jerrys-user-password"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-data
+          emptyDir: {}
+          # For production, replace emptyDir with a PersistentVolumeClaim:
+          # persistentVolumeClaim:
+          #   claimName: mysql-pvc

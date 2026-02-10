@@ -1,0 +1,39 @@
+# =============================================================================
+# Root .gitignore — Jerry's Chaska
+# =============================================================================
+
+# ---------- Dependencies ----------
+node_modules/
+
+# ---------- Environment files (contain secrets) ----------
+.env
+.env.local
+.env.*.local
+
+# ---------- Build output ----------
+dist/
+build/
+
+# ---------- Logs ----------
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ---------- OS files ----------
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ---------- IDE / Editor ----------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ---------- Docker ----------
+# Do NOT push .dockerignore (they are fine to push, but .env must not be)
+
+# ---------- Package lock (optional — uncomment if you prefer) ----------
+# package-lock.json
