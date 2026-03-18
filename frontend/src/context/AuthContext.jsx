@@ -20,26 +20,19 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (email, password) => {
-        // Try real API first
         const apiResult = await apiLoginUser({ email, password });
         if (apiResult.success) {
             const { user: userData, token } = apiResult.data;
+            if (userData.role === 'admin') {
+                return {
+                    success: false,
+                    redirectToAdmin: true,
+                    message: 'Please use the admin portal to sign in as admin.'
+                };
+            }
             setUser(userData);
             localStorage.setItem('user', JSON.stringify(userData));
             localStorage.setItem('token', token);
-            return { success: true };
-        }
-
-        // Fallback to mock login for demo
-        if (email === 'admin@jerryschaska.com' && password === 'admin123') {
-            const adminUser = { id: 1, name: 'Admin', email, role: 'admin' };
-            setUser(adminUser);
-            localStorage.setItem('user', JSON.stringify(adminUser));
-            return { success: true };
-        } else if (email === 'user@example.com' && password === 'user123') {
-            const normalUser = { id: 2, name: 'User', email, role: 'user' };
-            setUser(normalUser);
-            localStorage.setItem('user', JSON.stringify(normalUser));
             return { success: true };
         }
         return { success: false, message: apiResult.message || 'Invalid credentials' };

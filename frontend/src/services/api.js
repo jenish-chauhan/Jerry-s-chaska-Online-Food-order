@@ -1,9 +1,8 @@
 import axios from 'axios';
-import { menuItems, categories } from './mockData';
 
-// In Kubernetes, Ingress will route /api to the backend service.
-// For local development, VITE_API_URL can be set to http://localhost:3000/api.
-const API_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || '/api';
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV ? "http://localhost:5000/api" : "/api");
 
 const api = axios.create({
     baseURL: API_URL,
@@ -37,28 +36,97 @@ export const loginUser = async (credentials) => {
     }
 };
 
-// Menu endpoints (using mock data for now)
+// Menu endpoints (integrated with real backend API)
 export const getMenuItems = async () => {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return { data: menuItems };
+    try {
+        const response = await api.get('/menu');
+        // Map backend fields to frontend expected fields
+        const items = response.data.data.map(item => ({
+            ...item,
+            id: item._id || item.id,
+            image: item.image_url,
+            categoryId: item.category,
+            price: parseFloat(item.price)
+        }));
+        return { data: items };
+    } catch (error) {
+        console.error('Failed to get menu items', error);
+        return { data: [] };
+    }
 };
 
 export const getCategories = async () => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return { data: categories };
+    try {
+        const response = await api.get('/menu');
+        // Extract unique categories from the menu items
+        const uniqueCategories = [...new Set(response.data.data.map(item => item.category))];
+        const categories = uniqueCategories.filter(Boolean).map(cat => ({
+            id: cat,
+            name: cat
+        }));
+        return { data: categories };
+    } catch (error) {
+        console.error('Failed to get categories', error);
+        return { data: [] };
+    }
 };
 
 export const getMenuItemsByCategory = async (categoryId) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    if (categoryId === 'all') return { data: menuItems };
-    return { data: menuItems.filter(item => item.categoryId === categoryId) };
+    try {
+        if (categoryId === 'all') return await getMenuItems();
+        const response = await api.get(`/menu/category/${categoryId}`);
+        const items = response.data.data.map(item => ({
+            ...item,
+            id: item._id || item.id,
+            image: item.image_url,
+            categoryId: item.category,
+            price: parseFloat(item.price)
+        }));
+        return { data: items };
+    } catch (error) {
+        console.error('Failed to get menu items by category', error);
+        return { data: [] };
+    }
 };
 
 export const createOrder = async (orderData) => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log('Order created:', orderData);
-    return { data: { success: true, orderId: Math.floor(Math.random() * 1000) } };
+    try {
+        const token = localStorage.getItem('token');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const response = await api.post('/orders', orderData, { headers });
+        return { success: true, data: response.data.data };
+    } catch (error) {
+        return {
+            success: false,
+            message: error.response?.data?.error || 'Failed to place order.'
+        };
+    }
+};
+
+export const getUserOrders = async (userId) => {
+    try {
+        const token = localStorage.getItem('token');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const response = await api.get(`/orders/user/${userId}`, { headers });
+        return { success: true, data: response.data.data };
+    } catch (error) {
+        console.error('Failed to get user orders', error);
+        return { success: false, data: [] };
+    }
+};
+
+export const confirmOrderPickup = async (orderNumber) => {
+    try {
+        const token = localStorage.getItem('token');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const response = await api.patch(`/orders/${orderNumber}/confirm-pickup`, {}, { headers });
+        return { success: true, data: response.data.data };
+    } catch (error) {
+        return {
+            success: false,
+            message: error.response?.data?.error || 'Failed to confirm order pickup.'
+        };
+    }
 };
 
 export default api;

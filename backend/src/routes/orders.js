@@ -4,19 +4,15 @@ const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const {
     createOrder,
     getUserOrders,
-    getAllOrders,
     getOrderById,
-    updateOrderStatus,
+    confirmPickup,
     orderValidation
 } = require('../controllers/orderController');
 
 // Protected routes (require authentication)
 router.post('/', authMiddleware, orderValidation, createOrder);
 router.get('/user/:userId', authMiddleware, getUserOrders);
+router.patch('/:id/confirm-pickup', authMiddleware, confirmPickup);
 router.get('/:id', authMiddleware, getOrderById);
-
-// Admin routes
-router.get('/', authMiddleware, adminMiddleware, getAllOrders);
-router.patch('/:id/status', authMiddleware, adminMiddleware, updateOrderStatus);
 
 module.exports = router;

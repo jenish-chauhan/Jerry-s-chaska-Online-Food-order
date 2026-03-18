@@ -1,50 +1,76 @@
-const { pool } = require('../config/database');
+const mongoose = require("mongoose");
 
-class FoodItem {
-    static async getAll() {
-        const [rows] = await pool.execute(
-            'SELECT * FROM food_items WHERE available = TRUE ORDER BY category, name'
-        );
-        return rows;
-    }
+const foodItemSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  description: {
+    type: String,
+    trim: true,
+  },
+  price: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
+  image_url: {
+    type: String,
+    trim: true,
+  },
+  category: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  available: {
+    type: Boolean,
+    default: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
 
-    static async getById(id) {
-        const [rows] = await pool.execute(
-            'SELECT * FROM food_items WHERE id = ?',
-            [id]
-        );
-        return rows[0];
-    }
+const FoodItem = mongoose.model("FoodItem", foodItemSchema);
 
-    static async getByCategory(category) {
-        const [rows] = await pool.execute(
-            'SELECT * FROM food_items WHERE category = ? AND available = TRUE',
-            [category]
-        );
-        return rows;
-    }
+// Static methods for compatibility
+FoodItem.getAll = async function () {
+  return await FoodItem.find({ available: true }).sort({
+    category: 1,
+    name: 1,
+  });
+};
 
-    static async create(itemData) {
-        const { name, description, price, image_url, category } = itemData;
-        const [result] = await pool.execute(
-            'INSERT INTO food_items (name, description, price, image_url, category) VALUES (?, ?, ?, ?, ?)',
-            [name, description, price, image_url, category]
-        );
-        return result.insertId;
-    }
+FoodItem.getById = async function (id) {
+  return await FoodItem.findOne({ _id: id });
+};
 
-    static async update(id, itemData) {
-        const { name, description, price, image_url, category, available } = itemData;
-        await pool.execute(
-            'UPDATE food_items SET name = ?, description = ?, price = ?, image_url = ?, category = ?, available = ? WHERE id = ?',
-            [name, description, price, image_url, category, available, id]
-        );
-        return this.getById(id);
-    }
+FoodItem.getByCategory = async function (category) {
+  return await FoodItem.find({ category, available: true });
+};
 
-    static async delete(id) {
-        await pool.execute('DELETE FROM food_items WHERE id = ?', [id]);
-    }
-}
+FoodItem.create = async function (itemData) {
+  const { name, description, price, image_url, category } = itemData;
+  const item = new FoodItem({ name, description, price, image_url, category });
+  const result = await item.save();
+  return result._id.toString();
+};
+
+FoodItem.update = async function (id, itemData) {
+  const { name, description, price, image_url, category, available } = itemData;
+  await FoodItem.findByIdAndUpdate(
+    id,
+    { name, description, price, image_url, category, available },
+    { new: true },
+  );
+  return await FoodItem.findById(id);
+};
+
+FoodItem.delete = async function (id) {
+  await FoodItem.findByIdAndDelete(id);
+};
 
 module.exports = FoodItem;

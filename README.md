@@ -2,13 +2,35 @@
 
 Jerry's Chaska is a professional food ordering application designed for authentic street food delivery. It features a modern, high-contrast dark-mode UI with real-time cart management, user ratings, and integrated customer support.
 
+## 🚀 Quick Start
+
+**⚠️ IMPORTANT**: See [`SETUP.md`](./SETUP.md) for complete setup instructions!
+
+```bash
+# Start with Docker (Recommended)
+docker-compose up -d
+```
+
+Access:
+
+- Frontend: http://localhost:5173
+- Admin Panel: http://localhost:8080
+- API Server: http://localhost:5000/api
+
+**📋 Documentation**:
+
+- [`SETUP.md`](./SETUP.md) - Complete setup guide
+- [`MIGRATION.md`](./MIGRATION.md) - Recent changes explained
+- [`TROUBLESHOOTING.md`](./TROUBLESHOOTING.md) - Quick solutions
+- [`CHANGES.md`](./CHANGES.md) - Detailed changelog
+
 ## 🚀 Tech Stack
 
-- **Frontend**: React 18, Tailwind CSS (Custom Dark Theme), Lucide Icons, EmailJS
-- **Backend**: Node.js, Express.js
-- **Database**: MySQL 8.0 (Relational data storage)
-- **Containerisation**: Docker (separate images per service)
-- **Orchestration**: Kubernetes (target runtime — no Docker Compose)
+- **Frontend**: React 18, Tailwind CSS (Custom Dark Theme), Lucide Icons, Axios
+- **Backend**: Node.js, Express.js, Mongoose
+- **Database**: MongoDB 7 (Document storage)
+- **Containerisation**: Docker & Docker Compose
+- **Authentication**: JWT + bcrypt
 
 ## 🏗️ High-Level Architecture
 
@@ -62,23 +84,23 @@ project-root/
 
 ## 📜 Key Responsibilities
 
-| Feature | Primary Component / File |
-| :--- | :--- |
-| **Authentication** | `frontend/src/context/AuthContext.jsx` & `backend/src/routes/auth.js` |
-| **Menu Management** | `frontend/src/pages/Menu.jsx` & `backend/src/controllers/menuController.js` |
+| Feature               | Primary Component / File                                                     |
+| :-------------------- | :--------------------------------------------------------------------------- |
+| **Authentication**    | `frontend/src/context/AuthContext.jsx` & `backend/src/routes/auth.js`        |
+| **Menu Management**   | `frontend/src/pages/Menu.jsx` & `backend/src/controllers/menuController.js`  |
 | **Ratings & Reviews** | `frontend/src/services/ratingsService.js` & `frontend/src/pages/Ratings.jsx` |
-| **Cart Logic** | `frontend/src/context/CartContext.jsx` (Local Persistence) |
-| **Contact Form** | `frontend/src/pages/Contact.jsx` (Integrated with EmailJS) |
+| **Cart Logic**        | `frontend/src/context/CartContext.jsx` (Local Persistence)                   |
+| **Contact Form**      | `frontend/src/pages/Contact.jsx` (Integrated with EmailJS)                   |
 
 ## 🔗 API Endpoints
 
-| Method | Path | Description |
-| :--- | :--- | :--- |
-| `GET` | `/api/menu` | Fetch all food items |
-| `POST` | `/api/auth/register` | Register a new user |
-| `POST` | `/api/auth/login` | Authenticate & receive JWT |
-| `POST` | `/api/orders` | Place a new order |
-| `GET` | `/health` | Backend health check |
+| Method | Path                 | Description                |
+| :----- | :------------------- | :------------------------- |
+| `GET`  | `/api/menu`          | Fetch all food items       |
+| `POST` | `/api/auth/register` | Register a new user        |
+| `POST` | `/api/auth/login`    | Authenticate & receive JWT |
+| `POST` | `/api/orders`        | Place a new order          |
+| `GET`  | `/health`            | Backend health check       |
 
 ---
 
@@ -103,11 +125,11 @@ docker build -t <registry>/jerrys-mysql:1.0 ./mysql
 
 ### Image Details
 
-| Image | Base | Exposed Port | Size (approx.) |
-| :--- | :--- | :---: | :---: |
-| `jerrys-frontend` | `nginx:alpine` | 80 | ~25 MB |
-| `jerrys-backend` | `node:20-alpine` | 3000 | ~120 MB |
-| `jerrys-mysql` | `mysql:8.0` | 3306 | ~550 MB |
+| Image             | Base             | Exposed Port | Size (approx.) |
+| :---------------- | :--------------- | :----------: | :------------: |
+| `jerrys-frontend` | `nginx:alpine`   |      80      |     ~25 MB     |
+| `jerrys-backend`  | `node:20-alpine` |     3000     |    ~120 MB     |
+| `jerrys-mysql`    | `mysql:8.0`      |     3306     |    ~550 MB     |
 
 ### Frontend Build Args
 
@@ -199,7 +221,7 @@ spec:
   ports:
     - port: 3306
       targetPort: 3306
-  clusterIP: None   # Headless service for stable DNS
+  clusterIP: None # Headless service for stable DNS
 ```
 
 ### 4. Deploy Backend
@@ -232,7 +254,7 @@ spec:
             - name: PORT
               value: "3000"
             - name: DB_HOST
-              value: jerrys-mysql          # ← Kubernetes Service DNS name
+              value: jerrys-mysql # ← Kubernetes Service DNS name
             - name: DB_PORT
               value: "3306"
             - name: DB_USER
@@ -250,7 +272,7 @@ spec:
                   name: jerrys-secrets
                   key: JWT_SECRET
             - name: FRONTEND_URL
-              value: "*"                   # Or the Ingress URL
+              value: "*" # Or the Ingress URL
           readinessProbe:
             httpGet:
               path: /health
@@ -319,7 +341,7 @@ spec:
   ports:
     - port: 80
       targetPort: 80
-  type: LoadBalancer   # Or NodePort / ClusterIP behind an Ingress
+  type: LoadBalancer # Or NodePort / ClusterIP behind an Ingress
 ```
 
 ### 6. Apply Manifests

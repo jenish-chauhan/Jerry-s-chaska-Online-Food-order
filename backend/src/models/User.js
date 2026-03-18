@@ -1,37 +1,55 @@
-const { pool } = require('../config/database');
+const mongoose = require("mongoose");
 
-class User {
-    static async create(userData) {
-        const { name, email, password_hash, role = 'user' } = userData;
-        const [result] = await pool.execute(
-            'INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)',
-            [name, email, password_hash, role]
-        );
-        return result.insertId;
-    }
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true,
+  },
+  password_hash: {
+    type: String,
+    required: true,
+  },
+  role: {
+    type: String,
+    enum: ["user", "admin"],
+    default: "user",
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
 
-    static async findByEmail(email) {
-        const [rows] = await pool.execute(
-            'SELECT * FROM users WHERE email = ?',
-            [email]
-        );
-        return rows[0];
-    }
+const User = mongoose.model("User", userSchema);
 
-    static async findById(id) {
-        const [rows] = await pool.execute(
-            'SELECT id, name, email, role, created_at FROM users WHERE id = ?',
-            [id]
-        );
-        return rows[0];
-    }
+// Static methods for compatibility
+User.create = async function (userData) {
+  const { name, email, password_hash, role = "user" } = userData;
+  const user = new User({ name, email, password_hash, role });
+  const result = await user.save();
+  return result._id.toString();
+};
 
-    static async getAll() {
-        const [rows] = await pool.execute(
-            'SELECT id, name, email, role, created_at FROM users'
-        );
-        return rows;
-    }
-}
+User.findByEmail = async function (email) {
+  return await User.findOne({ email: email.toLowerCase() });
+};
+
+User.findById = async function (id) {
+  return await User.findOne({ _id: id }).select(
+    "_id name email role createdAt",
+  );
+};
+
+User.getAll = async function () {
+  return await User.find({}).select("_id name email role createdAt");
+};
 
 module.exports = User;

@@ -1,53 +1,80 @@
 services:
-
-  mysql:
-    build: ./mysql
-    container_name: jerrys-mysql
-    restart: unless-stopped
+  mongodb:
+    image: mongo:7
+    container_name: jerrys_chaska_mongodb
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-secure_mongo_password}
+    ports:
+      - "27017:27017"
     volumes:
-      - mysql-data:/var/lib/mysql
-    networks:
-      - backend-net
+      - mongodb_data:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh -u admin -p ${MONGO_PASSWORD:-secure_mongo_password} --authenticationDatabase admin
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build: ./backend
-    container_name: jerrys-backend
-    restart: unless-stopped
-    depends_on:
-      - mysql
+    container_name: jerrys_chaska_backend
     environment:
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
+      - MONGO_URI=mongodb://admin:${MONGO_PASSWORD:-secure_mongo_password}@mongodb:27017/jerrys_chaska?authSource=admin
+      - JWT_SECRET=${JWT_SECRET:-please_set_a_strong_jwt_secret_in_env}
+      - PORT=5000
+      - NODE_ENV=production
+      - FRONTEND_URL=http://localhost:5173
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-jenishchauhan.08@gmail.com}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-jerry@612}
+      - ADMIN_NAME=${ADMIN_NAME:-Jenish Chauhan}
     ports:
       - "5000:5000"
-    networks:
-      - backend-net
-      - frontend-net
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:5000/health').then((res)=>process.exit(res.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   frontend:
     build:
       context: ./frontend
       args:
-        VITE_API_URL: ${VITE_API_URL}
-    container_name: jerrys-frontend
-    restart: unless-stopped
+        VITE_API_URL: /api
+        VITE_ADMIN_URL: http://localhost:8080
+    container_name: jerrys_chaska_frontend
+    ports:
+      - "5173:80"
     depends_on:
       - backend
+    restart: unless-stopped
+    environment:
+      - VITE_API_URL=/api
+      - VITE_ADMIN_URL=http://localhost:8080
+
+  admin-panel:
+    build:
+      context: ./admin-panel
+      args:
+        VITE_API_URL: /api
+    container_name: jerrys_chaska_admin
     ports:
-      - "80:80"
-    networks:
-      - frontend-net
-
-networks:
-  backend-net:
-  frontend-net:
-
+      - "8080:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    environment:
+      - VITE_API_URL=/api
 
 volumes:
-  mysql-data:
+  mongodb_data:

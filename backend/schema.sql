@@ -55,9 +55,9 @@ CREATE TABLE IF NOT EXISTS order_items (
     INDEX idx_order_id (order_id)
 );
 
--- Insert sample admin user (password: admin123)
+-- Insert admin user (password: jerry@612)
 INSERT INTO users (name, email, password_hash, role) VALUES 
-('Admin User', 'admin@jerryschaska.com', '$2b$10$rBV2KWq8h5oqFZxJz5Z5.OYvZ5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'admin');
+('Admin User', 'jenishchauhan.08@gmail.com', '$2b$10$gmevWbWzB1ttkduSgKQKgO7k5S4yFz1lOkWQ0D8xEfWpBKl6nlCF.', 'admin');
 
 -- Insert sample food items
 INSERT INTO food_items (name, description, price, image_url, category, available) VALUES

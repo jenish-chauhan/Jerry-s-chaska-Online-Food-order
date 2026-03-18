@@ -12,6 +12,7 @@ import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
 import OrderSuccess from './pages/OrderSuccess';
 import AdminDashboard from './pages/AdminDashboard';
+import Orders from './pages/Orders';
 
 function App() {
     return (
@@ -29,6 +30,7 @@ function App() {
                     <Route path="/privacy" element={<Privacy />} />
                     <Route path="/order-success" element={<OrderSuccess />} />
                     <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/orders" element={<Orders />} />
                 </Routes>
             </CartProvider>
         </AuthProvider>

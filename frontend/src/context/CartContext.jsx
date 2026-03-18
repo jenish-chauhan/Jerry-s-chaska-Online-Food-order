@@ -6,11 +6,15 @@ export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
     const [cart, setCart] = useState([]);
+    const normalizeItem = (item) => ({
+        ...item,
+        id: item.id || item._id || item.productId,
+    });
 
     useEffect(() => {
         const storedCart = localStorage.getItem('cart');
         if (storedCart) {
-            setCart(JSON.parse(storedCart));
+            setCart(JSON.parse(storedCart).map(normalizeItem));
         }
     }, []);
 
@@ -19,14 +23,15 @@ export const CartProvider = ({ children }) => {
     }, [cart]);
 
     const addToCart = (item) => {
+        const normalizedItem = normalizeItem(item);
         setCart((prevCart) => {
-            const existingItem = prevCart.find((i) => i.id === item.id);
+            const existingItem = prevCart.find((i) => i.id === normalizedItem.id);
             if (existingItem) {
                 return prevCart.map((i) =>
-                    i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+                    i.id === normalizedItem.id ? { ...i, quantity: i.quantity + 1 } : i
                 );
             }
-            return [...prevCart, { ...item, quantity: 1 }];
+            return [...prevCart, { ...normalizedItem, quantity: 1 }];
         });
     };
 

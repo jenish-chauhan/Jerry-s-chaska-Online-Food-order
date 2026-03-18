@@ -13,6 +13,7 @@ const Menu = () => {
     const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [ratingModalOpen, setRatingModalOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
     const [userRatings, setUserRatings] = useState({});
@@ -21,23 +22,28 @@ const Menu = () => {
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
+            setError(null);
             try {
                 const [itemsRes, categoriesRes] = await Promise.all([
                     getMenuItems(),
                     getCategories(),
                 ]);
-                setItems(itemsRes.data);
-                setCategories(categoriesRes.data);
+
+                setItems(itemsRes.data || []);
+                setCategories(categoriesRes.data || []);
 
                 // Load user ratings from localStorage
                 const ratings = {};
-                itemsRes.data.forEach(item => {
-                    const rating = getItemRating(item.id);
-                    if (rating) ratings[item.id] = rating;
-                });
+                if (itemsRes.data && itemsRes.data.length > 0) {
+                    itemsRes.data.forEach(item => {
+                        const rating = getItemRating(item.id);
+                        if (rating) ratings[item.id] = rating;
+                    });
+                }
                 setUserRatings(ratings);
             } catch (error) {
                 console.error("Failed to fetch menu data:", error);
+                setError("Unable to load menu items");
             } finally {
                 setLoading(false);
             }
@@ -94,8 +100,8 @@ const Menu = () => {
                         <Button
                             onClick={() => setSelectedCategory('all')}
                             className={`rounded-full px-6 shadow-sm hover:shadow-md transition-all hover:scale-105 ${selectedCategory === 'all'
-                                    ? 'text-white bg-orange-500 hover:bg-orange-600'
-                                    : 'text-gray-200 bg-slate-900 hover:text-white hover:bg-slate-800 border-0'
+                                ? 'text-white bg-orange-500 hover:bg-orange-600'
+                                : 'text-gray-200 bg-slate-900 hover:text-white hover:bg-slate-800 border-0'
                                 }`}
                         >
                             All Items
@@ -105,8 +111,8 @@ const Menu = () => {
                                 key={category.id}
                                 onClick={() => setSelectedCategory(category.id)}
                                 className={`rounded-full px-6 shadow-sm hover:shadow-md transition-all hover:scale-105 ${selectedCategory === category.id
-                                        ? 'text-white bg-orange-500 hover:bg-orange-600'
-                                        : 'text-gray-200 bg-slate-900 hover:text-white hover:bg-slate-800 border-0'
+                                    ? 'text-white bg-orange-500 hover:bg-orange-600'
+                                    : 'text-gray-200 bg-slate-900 hover:text-white hover:bg-slate-800 border-0'
                                     }`}
                             >
                                 {category.name}
@@ -119,6 +125,19 @@ const Menu = () => {
                         <div className="flex flex-col items-center justify-center py-20">
                             <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
                             <p className="text-gray-600">Loading tasty options...</p>
+                        </div>
+                    ) : error ? (
+                        <div className="flex flex-col items-center justify-center py-20">
+                            <div className="text-red-500 mb-4 p-4 bg-red-50 rounded-lg border border-red-200">
+                                <p className="text-lg font-semibold">{error}</p>
+                            </div>
+                        </div>
+                    ) : filteredItems.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-20 text-center">
+                            <div className="p-4 bg-orange-50 rounded-lg border border-orange-200 text-orange-600">
+                                <p className="text-lg font-semibold">No menu items available right now</p>
+                                <p className="text-sm mt-2">The admin can add items from the admin panel.</p>
+                            </div>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

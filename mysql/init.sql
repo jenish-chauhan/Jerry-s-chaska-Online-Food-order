@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS order_items (
 -- Seed data — Admin user (password: admin123)
 -- -------------------------------------------------------------------------
 INSERT INTO users (name, email, password_hash, role) VALUES
-('Admin User', 'admin@jerryschaska.com', '$2b$10$rBV2KWq8h5oqFZxJz5Z5.OYvZ5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z5Z', 'admin');
+('Admin User', 'admin@jerryschaska.com', '$2b$10$ee.bmyaSBMak./tyHGTHJOB/xaJiqINxXsQ2GAbbNV1.pfnsBpkaS', 'admin');
 
 -- -------------------------------------------------------------------------
 -- Seed data — Sample food items

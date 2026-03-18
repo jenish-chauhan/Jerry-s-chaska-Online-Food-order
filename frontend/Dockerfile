@@ -25,8 +25,11 @@ COPY . .
 #
 # In Kubernetes the API URL will point to the backend Service DNS name
 # (e.g. http://jerrys-backend:3000/api) or an Ingress path.
-ARG VITE_API_URL=http://localhost:5000/api
+ARG VITE_API_URL=/api
 ENV VITE_API_URL=${VITE_API_URL}
+
+ARG VITE_ADMIN_URL=http://localhost:8080
+ENV VITE_ADMIN_URL=${VITE_ADMIN_URL}
 
 # Produce the optimised production bundle in /app/dist
 RUN npm run build

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Menu as MenuIcon, X, User, LogOut, Star } from 'lucide-react';
+import { ShoppingCart, Menu as MenuIcon, X, User, LogOut, Star, ListOrdered } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { Button } from '../components/ui/Button';
@@ -24,6 +24,8 @@ const Navbar = () => {
 
     if (user?.role === 'admin') {
         navLinks.push({ name: 'Dashboard', path: '/admin' });
+    } else if (user) {
+        navLinks.push({ name: 'My Orders', path: '/orders', icon: <ListOrdered className="h-4 w-4" /> });
     }
 
     return (

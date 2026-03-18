@@ -6,7 +6,7 @@ import MainLayout from '../layout/MainLayout';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../components/ui/Card';
 import { Minus, Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const Cart = () => {
     const { cart, removeFromCart, updateQuantity, getCartTotal, clearCart } = useCart();
@@ -14,25 +14,74 @@ const Cart = () => {
     const navigate = useNavigate();
     const [isOrdering, setIsOrdering] = useState(false);
 
+    // Checkout Form State
+    const [formData, setFormData] = useState({
+        customerName: '',
+        phone: '',
+        email: ''
+    });
+
+    const [errors, setErrors] = useState({});
+
+    useEffect(() => {
+        if (user) {
+            setFormData(prev => ({
+                ...prev,
+                customerName: user.name || '',
+                email: user.email || ''
+            }));
+        }
+    }, [user]);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+
+        // Clear specific error when user starts typing
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: null }));
+        }
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+        if (!formData.customerName) newErrors.customerName = 'Name is required';
+        if (!formData.phone || !/^\d{10}$/.test(formData.phone)) newErrors.phone = 'Valid 10-digit phone is required';
+        if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Valid email is required';
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleCheckout = async () => {
         if (!user) {
             navigate('/login?redirect=cart');
             return;
         }
 
+        if (!validateForm()) {
+            return;
+        }
+
         setIsOrdering(true);
         try {
             const orderData = {
-                userId: user.id,
+                ...formData,
                 items: cart,
-                total: getCartTotal(),
-                date: new Date().toISOString(),
+                totalPrice: getCartTotal(),
+                paymentMethod: 'Cash on Delivery'
             };
-            await createOrder(orderData);
+            const response = await createOrder(orderData);
+            if (!response.success) {
+                throw new Error(response.message || 'Failed to place order.');
+            }
             clearCart();
-            navigate('/order-success');
+            // Pass order details to success page
+            navigate('/order-success', { state: { orderDetails: response.data } });
         } catch (error) {
             console.error("Order failed:", error);
+            // Optionally set an error state to show a message to the user
+            alert(error.message || "Failed to place order. Please try again.");
         } finally {
             setIsOrdering(false);
         }
@@ -57,8 +106,8 @@ const Cart = () => {
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
                 <h1 className="text-3xl font-bold text-gray-900 mb-8">Your Cart</h1>
                 <div className="lg:grid lg:grid-cols-12 lg:gap-8">
-                    <div className="lg:col-span-8">
-                        <div className="space-y-4">
+                    <div className="lg:col-span-7">
+                        <div className="space-y-4 mb-8">
                             {cart.map((item) => (
                                 <Card key={item.id} className="flex flex-row items-center p-4 bg-secondary border-0 shadow-md">
                                     <img
@@ -101,7 +150,33 @@ const Cart = () => {
                             ))}
                         </div>
                     </div>
-                    <div className="lg:col-span-4 mt-8 lg:mt-0">
+                    <div className="lg:col-span-5 mt-8 lg:mt-0">
+                        {/* Checkout Form */}
+                        {user && (
+                            <Card className="bg-secondary border-0 shadow-lg mb-4 p-4 text-white">
+                                <h3 className="text-xl font-semibold mb-4 text-orange-400">Customer Details</h3>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Full Name</label>
+                                        <input type="text" name="customerName" value={formData.customerName} onChange={handleInputChange} className="w-full bg-gray-800 border border-gray-700 rounded-md p-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500" placeholder="John Doe" />
+                                        {errors.customerName && <p className="text-red-400 text-xs mt-1">{errors.customerName}</p>}
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">Phone</label>
+                                            <input type="text" name="phone" value={formData.phone} onChange={handleInputChange} className="w-full bg-gray-800 border border-gray-700 rounded-md p-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500" placeholder="10-digit number" />
+                                            {errors.phone && <p className="text-red-400 text-xs mt-1">{errors.phone}</p>}
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">Email</label>
+                                            <input type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full bg-gray-800 border border-gray-700 rounded-md p-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500" placeholder="john@example.com" />
+                                            {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
+                                        </div>
+                                    </div>
+                                </div>
+                            </Card>
+                        )}
+
                         <Card className="bg-secondary border-0 shadow-lg">
                             <CardHeader>
                                 <CardTitle className="text-white font-semibold">Order Summary</CardTitle>
