@@ -1,55 +1,53 @@
 # =============================================================================
-# Frontend Dockerfile — Multi-stage build (React + Nginx)
-# Produces a lightweight, production-ready image for Kubernetes deployment.
+# Frontend Dockerfile - React + Nginx
+# Current stack note:
+#   The frontend build uses Vite build arguments and the final container serves
+#   the static app through Nginx with API/socket proxy rules from nginx.conf.
 # =============================================================================
 
-# ---------------------------------------------------------------------------
-# Stage 1: Build the React application
-# ---------------------------------------------------------------------------
+# ---------- Stage 1: build the React app ----------
+# Use Node.js only for compiling the production bundle.
 FROM node:20-alpine AS build
 
+# Set the working directory for the build stage.
 WORKDIR /app
 
-# Copy dependency manifests first for better Docker layer caching
+# Copy dependency manifests first to improve Docker layer caching.
 COPY package.json package-lock.json ./
 
-# Install all dependencies (including devDependencies needed for the build)
+# Install all dependencies needed for the production build.
 RUN npm ci
 
-# Copy the rest of the source code
+# Copy the full frontend source into the build container.
 COPY . .
 
-# Build-time environment variables can be injected via --build-arg.
-# Example:
-#   docker build --build-arg VITE_API_URL=http://backend:3000/api ./frontend
-#
-# In Kubernetes the API URL will point to the backend Service DNS name
-# (e.g. http://jerrys-backend:3000/api) or an Ingress path.
+# Vite reads these values at build time, not at runtime.
+# VITE_API_URL is usually /api because Nginx proxies API requests to backend.
 ARG VITE_API_URL=/api
 ENV VITE_API_URL=${VITE_API_URL}
 
+# VITE_ADMIN_URL is used when the customer app redirects to the admin panel.
 ARG VITE_ADMIN_URL=http://localhost:8080
 ENV VITE_ADMIN_URL=${VITE_ADMIN_URL}
 
-# Produce the optimised production bundle in /app/dist
+# Generate the static production files in /app/dist.
 RUN npm run build
 
-# ---------------------------------------------------------------------------
-# Stage 2: Serve the static assets with Nginx
-# ---------------------------------------------------------------------------
+# ---------- Stage 2: serve with Nginx ----------
+# Use a lightweight web server image for the final runtime container.
 FROM nginx:alpine
 
-# Remove the default Nginx site
+# Remove the default Nginx welcome page content.
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copy the custom Nginx configuration for SPA routing
+# Copy the custom SPA + proxy configuration.
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy the built React app from the build stage
+# Copy the built frontend files from the build stage.
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Expose port 80 (the standard HTTP port Nginx listens on)
+# Nginx listens on port 80 inside the container.
 EXPOSE 80
 
-# Start Nginx in the foreground so the container stays alive
+# Keep Nginx in the foreground so the container stays alive.
 CMD ["nginx", "-g", "daemon off;"]

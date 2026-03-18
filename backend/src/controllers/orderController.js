@@ -1,16 +1,77 @@
 const { body, validationResult } = require("express-validator");
+const mongoose = require("mongoose");
 const Order = require("../models/Order");
+const FoodItem = require("../models/FoodItem");
 const { emitOrderCreated, emitOrderUpdated } = require("../socket");
 
-const serializeOrder = (order) => ({
+const normalizeOrderItem = (item, menuItemMap = new Map()) => {
+  const productId = String(item.id || item._id || item.productId || "");
+  const fallbackItem = productId ? menuItemMap.get(productId) : null;
+  const quantity = Math.max(1, Number(item.quantity) || 1);
+  const price = Number(item.price ?? fallbackItem?.price ?? 0);
+
+  return {
+    productId,
+    productName:
+      item.name || item.productName || fallbackItem?.name || "Menu Item",
+    quantity,
+    price,
+    image: item.image || item.image_url || fallbackItem?.image_url || "",
+  };
+};
+
+const getMenuItemMap = async (items) => {
+  const validObjectIds = [
+    ...new Set(
+      items
+        .map((item) => item.id || item._id || item.productId)
+        .filter((value) => mongoose.Types.ObjectId.isValid(value))
+        .map((value) => value.toString()),
+    ),
+  ];
+
+  if (validObjectIds.length === 0) {
+    return new Map();
+  }
+
+  const menuItems = await FoodItem.find({
+    _id: { $in: validObjectIds },
+  }).select("_id name price image_url");
+
+  return new Map(
+    menuItems.map((item) => [
+      item._id.toString(),
+      {
+        name: item.name,
+        price: item.price,
+        image_url: item.image_url,
+      },
+    ]),
+  );
+};
+
+const serializeOrder = (order, menuItemMap = new Map()) => ({
   id: order._id.toString(),
   orderNumber: order.orderNumber,
   userId: order.userId,
   customerName: order.customerName,
   email: order.email,
   phone: order.phone,
-  items: order.items,
-  itemCount: order.items.reduce((acc, item) => acc + item.quantity, 0),
+  items: order.items.map((item) => {
+    const fallbackItem = item.productId ? menuItemMap.get(item.productId) : null;
+
+    return {
+      productId: item.productId,
+      productName: item.productName || fallbackItem?.name || "Menu Item",
+      quantity: Number(item.quantity) || 0,
+      price: Number(item.price ?? fallbackItem?.price) || 0,
+      image: item.image || fallbackItem?.image_url || "",
+    };
+  }),
+  itemCount: order.items.reduce(
+    (acc, item) => acc + (Number(item.quantity) || 0),
+    0,
+  ),
   totalPrice: order.totalPrice,
   total_price: order.totalPrice,
   paymentMethod: order.paymentMethod,
@@ -24,10 +85,49 @@ const serializeOrder = (order) => ({
   updated_at: order.updatedAt,
 });
 
+const getOrderMenuItemMap = async (orders) => {
+  const validObjectIds = [
+    ...new Set(
+      orders
+        .flatMap((order) => order.items || [])
+        .map((item) => item.productId)
+        .filter((value) => mongoose.Types.ObjectId.isValid(value))
+        .map((value) => value.toString()),
+    ),
+  ];
+
+  if (validObjectIds.length === 0) {
+    return new Map();
+  }
+
+  const menuItems = await FoodItem.find({
+    _id: { $in: validObjectIds },
+  }).select("_id name price image_url");
+
+  return new Map(
+    menuItems.map((item) => [
+      item._id.toString(),
+      {
+        name: item.name,
+        price: item.price,
+        image_url: item.image_url,
+      },
+    ]),
+  );
+};
+
 const orderValidation = [
   body("items")
     .isArray({ min: 1 })
     .withMessage("Order must contain at least one item"),
+  body("items.*.quantity")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Item quantity must be at least 1"),
+  body("items.*.price")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage("Item price must be a positive number"),
   body().custom((value) => {
     const totalPrice = value.totalPrice ?? value.total_price;
     if (Number.isNaN(Number(totalPrice)) || Number(totalPrice) < 0) {
@@ -58,19 +158,14 @@ const createOrder = async (req, res) => {
       total_price,
       paymentMethod,
     } = req.body;
+    const menuItemMap = await getMenuItemMap(items);
 
     const newOrder = new Order({
       userId: req.user.id.toString(),
       customerName,
       phone,
       email,
-      items: items.map((item) => ({
-        productId: item.id || item._id || item.productId,
-        productName: item.name || item.productName,
-        quantity: item.quantity,
-        price: item.price,
-        image: item.image,
-      })),
+      items: items.map((item) => normalizeOrderItem(item, menuItemMap)),
       totalPrice: Number(totalPrice ?? total_price),
       paymentMethod: paymentMethod || "Cash on Delivery",
       paymentStatus: "pending",
@@ -101,7 +196,9 @@ const getUserOrders = async (req, res) => {
     }
 
     const orders = await Order.find({ userId }).sort({ createdAt: -1 });
-    res.json({ data: orders.map(serializeOrder) });
+    const menuItemMap = await getOrderMenuItemMap(orders);
+
+    res.json({ data: orders.map((order) => serializeOrder(order, menuItemMap)) });
   } catch (error) {
     console.error("Get user orders error:", error);
     res.status(500).json({ error: "Failed to fetch orders" });
@@ -111,7 +208,9 @@ const getUserOrders = async (req, res) => {
 const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find().sort({ createdAt: -1 });
-    res.json({ data: orders.map(serializeOrder) });
+    const menuItemMap = await getOrderMenuItemMap(orders);
+
+    res.json({ data: orders.map((order) => serializeOrder(order, menuItemMap)) });
   } catch (error) {
     console.error("Get all orders error:", error);
     res.status(500).json({ error: "Failed to fetch orders" });
@@ -131,7 +230,8 @@ const getOrderById = async (req, res) => {
       return res.status(403).json({ error: "Access denied" });
     }
 
-    res.json({ data: serializeOrder(order) });
+    const menuItemMap = await getOrderMenuItemMap([order]);
+    res.json({ data: serializeOrder(order, menuItemMap) });
   } catch (error) {
     console.error("Get order error:", error);
     res.status(500).json({ error: "Failed to fetch order" });
@@ -160,7 +260,8 @@ const confirmPickup = async (req, res) => {
     order.orderStatus = "completed";
     await order.save();
 
-    const serializedOrder = serializeOrder(order);
+    const menuItemMap = await getOrderMenuItemMap([order]);
+    const serializedOrder = serializeOrder(order, menuItemMap);
     emitOrderUpdated(serializedOrder);
 
     return res.status(200).json({
@@ -201,7 +302,8 @@ const updateOrderStatus = async (req, res) => {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    const serializedOrder = serializeOrder(order);
+    const menuItemMap = await getOrderMenuItemMap([order]);
+    const serializedOrder = serializeOrder(order, menuItemMap);
     emitOrderUpdated(serializedOrder);
 
     return res.status(200).json({

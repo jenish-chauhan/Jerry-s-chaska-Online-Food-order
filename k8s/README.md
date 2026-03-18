@@ -1,96 +1,164 @@
-# Kubernetes Manifests — Jerry's Chaska
+# Kubernetes Setup
 
-This directory contains Kubernetes manifests to deploy the full 3-tier Jerry's Chaska application (Frontend, Backend, MySQL).
+This folder contains a working Kubernetes setup for the current application stack:
 
-## 📁 File Overview
+- `mongodb`
+- `backend`
+- `frontend`
+- `admin-panel`
 
-| File | Kind | Description |
-| :--- | :--- | :--- |
-| `frontend-deployment.yml` | Deployment | 2 replicas of the React SPA served by Nginx on port **80** |
-| `frontend-service.yml` | Service (LoadBalancer) | Exposes the frontend to external traffic on port **80** |
-| `backend-deployment.yml` | Deployment | 2 replicas of the Node.js Express API on port **5000** |
-| `backend-service.yml` | Service (ClusterIP) | Internal service for backend on port **5000** |
-| `mysql-deployment.yml` | Deployment | 1 replica of MySQL 8.0 on port **3306** |
-| `mysql-service.yml` | Service (ClusterIP) | Internal service for MySQL on port **3306** |
+The image names match the ones used in the root `docker-command-readme.md`:
 
-## 🔗 How Containers Communicate
+- `food-ordering-backend:latest`
+- `food-ordering-frontend:latest`
+- `food-ordering-admin:latest`
+- `mongo:7`
 
-```
-┌──────────────┐         ┌──────────────┐         ┌──────────────┐
-│   Frontend   │────────▶│   Backend    │────────▶│    MySQL     │
-│  (Nginx:80)  │  HTTP   │ (Node:5000)  │   TCP   │   (:3306)    │
-│              │         │              │         │              │
-│  Service:    │         │  Service:    │         │  Service:    │
-│  frontend    │         │  backend     │         │  mysql       │
-│  (LB / NP)  │         │  (ClusterIP) │         │  (ClusterIP) │
-└──────────────┘         └──────────────┘         └──────────────┘
-```
+## Files
 
-- **Frontend → Backend**: The React app calls the API at `/api` (configured via `VITE_API_BASE_URL`). In Kubernetes, an Ingress (added later) will route `/api` requests to the `backend` Service.
-- **Backend → MySQL**: The Express app connects to `DB_HOST=mysql` which resolves via Kubernetes DNS to the `mysql` ClusterIP Service.
-- **External Users → Frontend**: Users access the app through the `frontend` LoadBalancer Service (or NodePort on Minikube).
+- `namespace.yml`
+- `app-secret.yml`
+- `backend-config.yml`
+- `mongodb-pvc.yml`
+- `mongodb-deployment.yml`
+- `mongodb-service.yml`
+- `backend-deployment.yml`
+- `backend-service.yml`
+- `frontend-deployment.yml`
+- `frontend-service.yml`
+- `admin-panel-deployment.yml`
+- `admin-panel-service.yml`
 
-> **Key concept**: In Kubernetes, service DNS names (`backend`, `mysql`) replace `localhost`. Each Service gets a stable DNS entry like `<service-name>.<namespace>.svc.cluster.local`.
+## 1. Build Docker Images
 
-## 🚀 Deploy Commands
+Run these from the project root:
 
-### Apply all manifests at once
+```powershell
+cd c:\xampp\htdocs\FOOD-ORDERING-SYS
 
-```bash
-kubectl apply -f k8s/
-```
-
-### Or apply individually (in order)
-
-```bash
-# 1. MySQL first (backend depends on it)
-kubectl apply -f k8s/mysql-deployment.yml
-kubectl apply -f k8s/mysql-service.yml
-
-# 2. Backend next (frontend depends on it)
-kubectl apply -f k8s/backend-deployment.yml
-kubectl apply -f k8s/backend-service.yml
-
-# 3. Frontend last
-kubectl apply -f k8s/frontend-deployment.yml
-kubectl apply -f k8s/frontend-service.yml
+docker build -t food-ordering-backend:latest .\backend
+docker build `
+  --build-arg VITE_API_URL=/api `
+  --build-arg VITE_ADMIN_URL=http://localhost:30081 `
+  -t food-ordering-frontend:latest `
+  .\frontend
+docker build `
+  --build-arg VITE_API_URL=/api `
+  -t food-ordering-admin:latest `
+  .\admin-panel
+docker pull mongo:7
 ```
 
-### Check status
+## 2. Make Images Available To Kubernetes
 
-```bash
-# View all pods
-kubectl get pods
+Use the option that matches your local cluster.
 
-# View all services
-kubectl get svc
+### Option A: Minikube
 
-# View logs for a specific pod
-kubectl logs <pod-name>
-
-# Describe a pod for debugging
-kubectl describe pod <pod-name>
+```powershell
+minikube image load food-ordering-backend:latest
+minikube image load food-ordering-frontend:latest
+minikube image load food-ordering-admin:latest
+minikube image load mongo:7
 ```
 
-### Access the application
+### Option B: kind
 
-**On EKS / cloud clusters:**
-```bash
-# Get the external IP of the frontend LoadBalancer
-kubectl get svc frontend
-# Open the EXTERNAL-IP in your browser
+```powershell
+kind load docker-image food-ordering-backend:latest
+kind load docker-image food-ordering-frontend:latest
+kind load docker-image food-ordering-admin:latest
+kind load docker-image mongo:7
 ```
 
-**On Minikube:**
-```bash
-# Change frontend-service.yml type to NodePort, then:
-minikube service frontend
+### Option C: Docker Desktop Kubernetes
+
+If Docker Desktop Kubernetes is enabled, the local Docker images are usually available directly.
+
+## 3. Apply All Kubernetes Files
+
+Run:
+
+```powershell
+kubectl apply -f .\k8s\namespace.yml
+kubectl apply -f .\k8s\app-secret.yml
+kubectl apply -f .\k8s\backend-config.yml
+kubectl apply -f .\k8s\mongodb-pvc.yml
+kubectl apply -f .\k8s\mongodb-deployment.yml
+kubectl apply -f .\k8s\mongodb-service.yml
+kubectl apply -f .\k8s\backend-deployment.yml
+kubectl apply -f .\k8s\backend-service.yml
+kubectl apply -f .\k8s\frontend-deployment.yml
+kubectl apply -f .\k8s\frontend-service.yml
+kubectl apply -f .\k8s\admin-panel-deployment.yml
+kubectl apply -f .\k8s\admin-panel-service.yml
 ```
 
-## ⚠️ Important Notes
+Or apply the whole folder after the namespace exists:
 
-- **Replace image placeholders**: Update `<your-dockerhub-username>` in all deployment files with your actual Docker Hub username or container registry path.
-- **Secrets**: The environment variables in the deployment files contain placeholder passwords. In production, use Kubernetes Secrets instead of plain-text values.
-- **Persistent storage**: The MySQL deployment uses `emptyDir` by default (data is lost on pod restart). For production, switch to a PersistentVolumeClaim.
-- **No Ingress yet**: Ingress will be added in a future step to route `/api` to the backend and `/` to the frontend under a single domain.
-- **No Docker Compose**: This project uses Kubernetes as the target runtime. Docker Compose is intentionally not included.
+```powershell
+kubectl apply -f .\k8s
+```
+
+## 4. Check Status
+
+```powershell
+kubectl get all -n food-ordering
+kubectl get pods -n food-ordering
+kubectl get svc -n food-ordering
+```
+
+If something is not starting:
+
+```powershell
+kubectl describe pod -n food-ordering <pod-name>
+kubectl logs -n food-ordering deployment/mongodb
+kubectl logs -n food-ordering deployment/backend
+kubectl logs -n food-ordering deployment/frontend
+kubectl logs -n food-ordering deployment/admin-panel
+```
+
+## 5. Access The Application
+
+This setup uses `NodePort` for the UI services:
+
+- Frontend: `http://localhost:30080`
+- Admin Panel: `http://localhost:30081`
+
+Backend is available inside the cluster through the `backend` service on port `5000`.
+
+For local API testing, use port-forward:
+
+```powershell
+kubectl port-forward -n food-ordering svc/backend 5000:5000
+```
+
+Then open:
+
+- Backend health: `http://localhost:5000/health`
+- Backend API: `http://localhost:5000/api/menu`
+
+## 6. Connectivity Map
+
+- `frontend` -> `backend:5000`
+- `admin-panel` -> `backend:5000`
+- `backend` -> `mongodb:27017`
+
+The service names in the manifests are intentionally:
+
+- `frontend`
+- `admin-panel`
+- `backend`
+- `mongodb`
+
+This matches the internal hostnames expected by the Nginx configs and backend environment variables.
+
+## 7. Important Note About MongoDB Storage
+
+MongoDB now uses a `PersistentVolumeClaim` named `mongodb-pvc` so data survives pod recreation as long as the PVC remains available.
+
+## 8. Delete Everything
+
+```powershell
+kubectl delete namespace food-ordering
+```

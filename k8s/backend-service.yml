@@ -1,16 +1,9 @@
-# =============================================================================
-# Backend Service
-# Internal ClusterIP service — only reachable from within the cluster
-# The frontend (or an Ingress) routes traffic to this service
-# =============================================================================
 apiVersion: v1
 kind: Service
 metadata:
   name: backend
-  labels:
-    app: backend
+  namespace: food-ordering
 spec:
-  type: ClusterIP
   selector:
     app: backend
   ports:

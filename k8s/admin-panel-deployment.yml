@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
+  name: admin-panel
   namespace: food-ordering
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: frontend
+      app: admin-panel
   template:
     metadata:
       labels:
-        app: frontend
+        app: admin-panel
     spec:
       containers:
-        - name: frontend
-          image: food-ordering-frontend:latest
+        - name: admin-panel
+          image: food-ordering-admin:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80

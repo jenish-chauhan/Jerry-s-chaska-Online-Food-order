@@ -1,43 +1,40 @@
 # =============================================================================
-# Backend Dockerfile — Node.js 20 Alpine (production-ready)
-# Produces a minimal image suitable for Kubernetes deployment.
+# Backend Dockerfile - Node.js 20 Alpine
+# Current stack note:
+#   This backend talks to MongoDB, not MySQL. The old MySQL-oriented comments
+#   were misleading and have been replaced with the actual runtime variables.
 # =============================================================================
 
+# Use a small official Node.js image for the API runtime.
 FROM node:20-alpine
 
-# Set the working directory inside the container
+# All next commands run from /app inside the container.
 WORKDIR /app
 
-# Copy dependency manifests first for better Docker layer caching
+# Copy dependency manifests first so Docker can reuse cached install layers
+# when only application code changes.
 COPY package.json package-lock.json ./
 
-# Install only production dependencies (skip devDependencies like nodemon)
-RUN npm ci --only=production
+# Install only runtime dependencies. This keeps the image smaller and avoids
+# shipping development-only packages like nodemon.
+RUN npm ci --omit=dev
 
-# Copy the application source code
+# Copy the backend source code that the app needs at runtime.
 COPY src/ ./src/
 
-# ---------------------------------------------------------------------------
-# Environment variables — injected at runtime via Kubernetes Secrets / ConfigMaps
-# ---------------------------------------------------------------------------
-# DB_HOST   — MySQL service DNS name in Kubernetes (e.g. "mysql" or "jerrys-mysql")
-# DB_PORT   — MySQL port (default 3306)
-# DB_USER   — MySQL user
-# DB_PASSWORD — MySQL password
-# DB_NAME   — Database name (default "jerrys_chaska")
-# JWT_SECRET — Secret key for JWT token signing
-# FRONTEND_URL — Allowed CORS origin (e.g. "http://jerrys-frontend" or Ingress URL)
-# PORT      — Port the Express server listens on (default 3000)
-# NODE_ENV  — "production" in Kubernetes
+# Runtime environment variables expected by this container:
+# - MONGO_URI      MongoDB connection string
+# - JWT_SECRET     Secret used to sign auth tokens
+# - FRONTEND_URL   Allowed frontend/admin origins for CORS and sockets
+# - PORT           Express server port (this app uses 5000 by default)
+# - NODE_ENV       Usually "production" in containers
 
-# Expose the backend API port
-# The actual port is controlled by the PORT environment variable (default 3000).
-# In Kubernetes, set PORT=5000 via the Deployment manifest.
+# Document the API port exposed by the container.
 EXPOSE 5000
 
-# Run as non-root user for security
+# Create and use a non-root user for safer container execution.
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 
-# Start the Express server
+# Start the backend API.
 CMD ["node", "src/app.js"]

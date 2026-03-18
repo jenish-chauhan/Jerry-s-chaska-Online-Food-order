@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "../components/AdminLayout";
 import { getAllOrders, updateOrderStatus } from "../services/api";
-import { RefreshCw, Search } from "lucide-react";
+import { Eye, Package, RefreshCw, Search, X } from "lucide-react";
 import { disconnectAdminSocket, getAdminSocket } from "../services/socket";
 
 const statusColors = {
   pending: "badge-pending",
-  accepted: "badge-confirmed", // Reusing confirmed style for accepted
+  accepted: "badge-confirmed",
   preparing: "badge-preparing",
   ready: "badge-ready",
-  completed: "badge-delivered", // Reusing delivered style for completed
+  completed: "badge-delivered",
   cancelled: "badge-cancelled",
 };
 
@@ -22,12 +22,45 @@ const MANUAL_STATUSES = [
 ];
 const FILTER_STATUSES = [...MANUAL_STATUSES, "completed"];
 
+const getItemName = (item) =>
+  item?.productName || item?.name || item?.title || "Menu Item";
+
+const getNormalizedItems = (items = []) =>
+  Array.isArray(items)
+    ? items.map((item) => ({
+        productId: item?.productId || item?.id || "",
+        productName: getItemName(item),
+        quantity: Math.max(1, Number(item?.quantity) || 1),
+        price: Number(item?.price) || 0,
+        image: item?.image || "",
+      }))
+    : [];
+
+const getItemMetrics = (items = []) => {
+  const normalizedItems = getNormalizedItems(items);
+  const totalUnits = normalizedItems.reduce(
+    (sum, item) => sum + item.quantity,
+    0,
+  );
+
+  return {
+    normalizedItems,
+    previewItems: normalizedItems.slice(0, 3),
+    hiddenCount: Math.max(0, normalizedItems.length - 3),
+    uniqueCount: normalizedItems.length,
+    totalUnits,
+  };
+};
+
+const formatCurrency = (value) => `$${parseFloat(value || 0).toFixed(2)}`;
+
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [updatingId, setUpdatingId] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -68,6 +101,9 @@ const Orders = () => {
           existing.orderNumber === order.orderNumber ? order : existing,
         ),
       );
+      setSelectedOrder((current) =>
+        current?.orderNumber === order.orderNumber ? order : current,
+      );
     };
 
     socket.on("order:created", handleOrderCreated);
@@ -83,11 +119,20 @@ const Orders = () => {
   const handleStatusChange = async (orderNumber, newStatus) => {
     setUpdatingId(orderNumber);
     try {
-      await updateOrderStatus(orderNumber, newStatus);
+      const response = await updateOrderStatus(orderNumber, newStatus);
+      const updatedOrder = response?.data;
+
       setOrders((prev) =>
-        prev.map((o) =>
-          o.orderNumber === orderNumber ? { ...o, orderStatus: newStatus } : o,
+        prev.map((order) =>
+          order.orderNumber === orderNumber
+            ? updatedOrder || { ...order, orderStatus: newStatus }
+            : order,
         ),
+      );
+      setSelectedOrder((current) =>
+        current?.orderNumber === orderNumber
+          ? updatedOrder || { ...current, orderStatus: newStatus }
+          : current,
       );
     } catch (e) {
       alert("Failed to update status: " + e.message);
@@ -96,19 +141,34 @@ const Orders = () => {
     }
   };
 
-  const filtered = orders.filter((o) => {
+  const filtered = orders.filter((order) => {
+    const normalizedSearch = search.toLowerCase();
     const matchSearch =
       !search ||
-      String(o.orderNumber || "")
+      String(order.orderNumber || "")
         .toLowerCase()
-        .includes(search.toLowerCase()) ||
-      String(o.customerName || "")
+        .includes(normalizedSearch) ||
+      String(order.customerName || "")
         .toLowerCase()
-        .includes(search.toLowerCase());
+        .includes(normalizedSearch) ||
+      String(order.phone || "")
+        .toLowerCase()
+        .includes(normalizedSearch) ||
+      (Array.isArray(order.items)
+        ? order.items.some((item) =>
+            getItemName(item).toLowerCase().includes(normalizedSearch),
+          )
+        : false);
+
     const matchStatus =
-      filterStatus === "all" || o.orderStatus === filterStatus;
+      filterStatus === "all" || order.orderStatus === filterStatus;
+
     return matchSearch && matchStatus;
   });
+
+  const selectedOrderMetrics = selectedOrder
+    ? getItemMetrics(selectedOrder.items)
+    : null;
 
   return (
     <AdminLayout>
@@ -119,6 +179,8 @@ const Orders = () => {
             alignItems: "center",
             justifyContent: "space-between",
             marginBottom: 28,
+            gap: 16,
+            flexWrap: "wrap",
           }}
         >
           <div>
@@ -126,7 +188,8 @@ const Orders = () => {
               Orders
             </h1>
             <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>
-              Manage and update customer orders
+              Live order queue with full item visibility for every customer
+              order
             </p>
           </div>
           <button className="btn btn-ghost btn-sm" onClick={fetchOrders}>
@@ -134,7 +197,6 @@ const Orders = () => {
           </button>
         </div>
 
-        {/* Filters */}
         <div
           style={{
             display: "flex",
@@ -156,22 +218,26 @@ const Orders = () => {
             />
             <input
               className="form-input"
-              placeholder="Search by ID or customer..."
+              placeholder="Search by ID, customer, phone, or item..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{ paddingLeft: 36, width: 260 }}
+              style={{ paddingLeft: 36, width: 320 }}
             />
           </div>
           <select
             className="form-input form-select"
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            style={{ width: 160 }}
+            style={{ width: 170 }}
           >
             <option value="all">All Statuses</option>
-            {FILTER_STATUSES.map((s) => (
-              <option key={s} value={s} style={{ textTransform: "capitalize" }}>
-                {s}
+            {FILTER_STATUSES.map((status) => (
+              <option
+                key={status}
+                value={status}
+                style={{ textTransform: "capitalize" }}
+              >
+                {status}
               </option>
             ))}
           </select>
@@ -222,102 +288,227 @@ const Orders = () => {
                       </td>
                     </tr>
                   ) : (
-                    filtered.map((order) => (
-                      <tr key={order.orderNumber}>
-                        <td style={{ fontWeight: 700 }}>{order.orderNumber}</td>
-                        <td>
-                          <div style={{ fontWeight: 600 }}>
-                            {order.customerName || "Customer"}
-                          </div>
-                          <div
-                            style={{ fontSize: 12, color: "var(--text-muted)" }}
+                    filtered.map((order) => {
+                      const { previewItems, hiddenCount, uniqueCount, totalUnits } =
+                        getItemMetrics(order.items);
+
+                      return (
+                        <tr key={order.orderNumber}>
+                          <td style={{ fontWeight: 700 }}>{order.orderNumber}</td>
+                          <td>
+                            <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                              {order.customerName || "Customer"}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: 12,
+                                color: "var(--text-muted)",
+                                marginBottom: 2,
+                              }}
+                            >
+                              {order.phone || ""}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: 12,
+                                color: "var(--text-secondary)",
+                              }}
+                            >
+                              {order.email || ""}
+                            </div>
+                          </td>
+                          <td style={{ minWidth: 320 }}>
+                            <div
+                              style={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: 8,
+                                marginBottom: 8,
+                              }}
+                            >
+                              {previewItems.map((item, index) => (
+                                <span
+                                  key={`${order.orderNumber}-${item.productId || index}`}
+                                  style={{
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    padding: "5px 10px",
+                                    borderRadius: 999,
+                                    background: "var(--primary-light)",
+                                    color: "var(--text-primary)",
+                                    fontSize: 12,
+                                    fontWeight: 700,
+                                    maxWidth: 220,
+                                  }}
+                                  title={item.productName}
+                                >
+                                  <span
+                                    style={{
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                      whiteSpace: "nowrap",
+                                    }}
+                                  >
+                                    {item.productName}
+                                  </span>
+                                  <span
+                                    style={{
+                                      marginLeft: 6,
+                                      color: "var(--primary-hover)",
+                                    }}
+                                  >
+                                    x{item.quantity}
+                                  </span>
+                                </span>
+                              ))}
+                            </div>
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 10,
+                                flexWrap: "wrap",
+                              }}
+                            >
+                              <span
+                                style={{
+                                  fontSize: 12,
+                                  color: "var(--text-muted)",
+                                }}
+                              >
+                                {uniqueCount} unique item
+                                {uniqueCount === 1 ? "" : "s"} • {totalUnits} qty
+                              </span>
+                              {hiddenCount > 0 && (
+                                <span
+                                  style={{
+                                    fontSize: 12,
+                                    color: "var(--primary)",
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  +{hiddenCount} more
+                                </span>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => setSelectedOrder(order)}
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: 6,
+                                  border: "none",
+                                  background: "transparent",
+                                  color: "var(--info)",
+                                  fontSize: 12,
+                                  fontWeight: 700,
+                                  cursor: "pointer",
+                                  padding: 0,
+                                }}
+                              >
+                                <Eye size={14} />
+                                View details
+                              </button>
+                            </div>
+                          </td>
+                          <td
+                            style={{
+                              fontWeight: 700,
+                              color: "var(--primary)",
+                            }}
                           >
-                            {order.phone || order.email || ""}
-                          </div>
-                        </td>
-                        <td
-                          style={{
-                            color: "var(--text-secondary)",
-                            fontSize: 13,
-                          }}
-                        >
-                          {order.itemCount ||
-                            (order.items && order.items.length) ||
-                            "—"}{" "}
-                          items
-                        </td>
-                        <td
-                          style={{ fontWeight: 700, color: "var(--primary)" }}
-                        >
-                          ${parseFloat(order.totalPrice || 0).toFixed(2)}
-                        </td>
-                        <td>
-                          <span
-                            className={`badge ${statusColors[order.orderStatus] || "badge-pending"}`}
-                          >
-                            {order.orderStatus}
-                          </span>
-                        </td>
-                        <td
-                          style={{
-                            color: "var(--text-secondary)",
-                            fontSize: 13,
-                          }}
-                        >
-                          {new Date(order.createdAt).toLocaleTimeString(
-                            "en-US",
-                            {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            },
-                          )}
-                          <br />
-                          <span style={{ fontSize: 11 }}>
-                            {new Date(order.createdAt).toLocaleDateString()}
-                          </span>
-                        </td>
-                        <td>
-                          {order.orderStatus === "completed" ? (
+                            {formatCurrency(order.totalPrice)}
+                          </td>
+                          <td>
                             <span
-                              style={{
-                                fontSize: 12,
-                                color: "#27AE60",
-                                fontWeight: 700,
-                              }}
+                              className={`badge ${statusColors[order.orderStatus] || "badge-pending"}`}
                             >
-                              Auto-completed
+                              {order.orderStatus}
                             </span>
-                          ) : (
-                            <select
-                              className="form-input form-select"
-                              value={order.orderStatus}
-                              disabled={updatingId === order.orderNumber}
-                              onChange={(e) =>
-                                handleStatusChange(
-                                  order.orderNumber,
-                                  e.target.value,
-                                )
-                              }
+                          </td>
+                          <td
+                            style={{
+                              color: "var(--text-secondary)",
+                              fontSize: 13,
+                            }}
+                          >
+                            {new Date(order.createdAt).toLocaleTimeString(
+                              "en-US",
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )}
+                            <br />
+                            <span style={{ fontSize: 11 }}>
+                              {new Date(order.createdAt).toLocaleDateString()}
+                            </span>
+                          </td>
+                          <td>
+                            <div
                               style={{
-                                fontSize: 12,
-                                padding: "5px 28px 5px 10px",
-                                width: 130,
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 10,
                               }}
                             >
-                              {[...MANUAL_STATUSES, order.orderStatus]
-                                .filter((value, index, array) =>
-                                  array.indexOf(value) === index,
-                                )
-                                .map((s) => (
-                                  <option key={s} value={s}>
-                                    {s.charAt(0).toUpperCase() + s.slice(1)}
-                                  </option>
-                                ))}
-                            </select>
-                          )}
-                        </td>
-                      </tr>
-                    ))
+                              {order.orderStatus === "completed" ? (
+                                <span
+                                  style={{
+                                    fontSize: 12,
+                                    color: "#27AE60",
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  Auto-completed
+                                </span>
+                              ) : (
+                                <select
+                                  className="form-input form-select"
+                                  value={order.orderStatus}
+                                  disabled={updatingId === order.orderNumber}
+                                  onChange={(e) =>
+                                    handleStatusChange(
+                                      order.orderNumber,
+                                      e.target.value,
+                                    )
+                                  }
+                                  style={{
+                                    fontSize: 12,
+                                    padding: "5px 28px 5px 10px",
+                                    width: 130,
+                                  }}
+                                >
+                                  {[...MANUAL_STATUSES, order.orderStatus]
+                                    .filter((value, index, array) =>
+                                      array.indexOf(value) === index,
+                                    )
+                                    .map((status) => (
+                                      <option key={status} value={status}>
+                                        {status.charAt(0).toUpperCase() +
+                                          status.slice(1)}
+                                      </option>
+                                    ))}
+                                </select>
+                              )}
+
+                              <button
+                                type="button"
+                                className="btn btn-ghost btn-sm"
+                                onClick={() => setSelectedOrder(order)}
+                                style={{
+                                  justifyContent: "center",
+                                  padding: "6px 10px",
+                                }}
+                              >
+                                <Eye size={14} />
+                                Open
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
@@ -329,6 +520,232 @@ const Orders = () => {
           Showing {filtered.length} of {orders.length} orders
         </p>
       </div>
+
+      {selectedOrder && selectedOrderMetrics && (
+        <div
+          className="modal-overlay"
+          onClick={() => setSelectedOrder(null)}
+          role="presentation"
+        >
+          <div
+            className="modal"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="order-details-title"
+          >
+            <div className="modal-header">
+              <div>
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: "var(--text-muted)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    marginBottom: 4,
+                  }}
+                >
+                  Order Details
+                </div>
+                <div
+                  id="order-details-title"
+                  className="modal-title"
+                  style={{ display: "flex", alignItems: "center", gap: 10 }}
+                >
+                  {selectedOrder.orderNumber}
+                  <span
+                    className={`badge ${statusColors[selectedOrder.orderStatus] || "badge-pending"}`}
+                  >
+                    {selectedOrder.orderStatus}
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() => setSelectedOrder(null)}
+                style={{ padding: 8 }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                  gap: 12,
+                }}
+              >
+                <div
+                  style={{
+                    border: "1px solid var(--border)",
+                    borderRadius: 10,
+                    padding: 14,
+                    background: "#FAFBFC",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: "var(--text-muted)",
+                      marginBottom: 6,
+                    }}
+                  >
+                    Customer
+                  </div>
+                  <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                    {selectedOrder.customerName}
+                  </div>
+                  <div
+                    style={{ fontSize: 13, color: "var(--text-secondary)" }}
+                  >
+                    {selectedOrder.phone}
+                  </div>
+                  <div
+                    style={{ fontSize: 13, color: "var(--text-secondary)" }}
+                  >
+                    {selectedOrder.email}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    border: "1px solid var(--border)",
+                    borderRadius: 10,
+                    padding: 14,
+                    background: "#FAFBFC",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: "var(--text-muted)",
+                      marginBottom: 6,
+                    }}
+                  >
+                    Summary
+                  </div>
+                  <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                    {selectedOrderMetrics.uniqueCount} unique item
+                    {selectedOrderMetrics.uniqueCount === 1 ? "" : "s"}
+                  </div>
+                  <div
+                    style={{ fontSize: 13, color: "var(--text-secondary)" }}
+                  >
+                    {selectedOrderMetrics.totalUnits} total quantity
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 800,
+                      color: "var(--primary)",
+                      marginTop: 8,
+                    }}
+                  >
+                    {formatCurrency(selectedOrder.totalPrice)}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    marginBottom: 12,
+                    fontWeight: 700,
+                  }}
+                >
+                  <Package size={16} color="var(--primary)" />
+                  All Ordered Items
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 10,
+                  }}
+                >
+                  {selectedOrderMetrics.normalizedItems.map((item, index) => (
+                    <div
+                      key={`${selectedOrder.orderNumber}-${item.productId || index}`}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 14,
+                        padding: 14,
+                        border: "1px solid var(--border)",
+                        borderRadius: 10,
+                        background: "#FAFBFC",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 12,
+                          minWidth: 0,
+                        }}
+                      >
+                        <div
+                          style={{
+                            minWidth: 34,
+                            height: 34,
+                            borderRadius: 10,
+                            background: "var(--primary-light)",
+                            color: "var(--primary-hover)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontWeight: 800,
+                            fontSize: 13,
+                          }}
+                        >
+                          x{item.quantity}
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <div
+                            style={{
+                              fontWeight: 700,
+                              color: "var(--text-primary)",
+                              wordBreak: "break-word",
+                            }}
+                          >
+                            {item.productName}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: 12,
+                              color: "var(--text-muted)",
+                              marginTop: 2,
+                            }}
+                          >
+                            Unit price: {formatCurrency(item.price)}
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          fontWeight: 800,
+                          color: "var(--text-primary)",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {formatCurrency(item.price * item.quantity)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 };

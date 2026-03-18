@@ -1,46 +1,46 @@
 # =============================================================================
-# Admin Panel Dockerfile — Multi-stage build (React + Nginx)
+# Admin Panel Dockerfile - React + Nginx
+# Fix applied:
+#   Removed the fallback `npm install`. Using only `npm ci` keeps builds
+#   deterministic and fails fast when package.json and package-lock.json drift.
 # =============================================================================
 
-# ---------------------------------------------------------------------------
-# Stage 1: Build the React application
-# ---------------------------------------------------------------------------
+# ---------- Stage 1: build the admin app ----------
 FROM node:20-alpine AS build
 
+# Set the working directory for dependency install and build output.
 WORKDIR /app
 
-# Copy dependency manifests first for better Docker layer caching
-COPY package.json package-lock.json* ./
+# Copy lockfile and manifest first so dependency install can be cached.
+COPY package.json package-lock.json ./
 
-# Install all dependencies (including devDependencies needed for the build)
-RUN npm ci || npm install
+# Install the exact locked dependency tree for reliable builds.
+RUN npm ci
 
-# Copy the rest of the source code
+# Copy the admin panel source code into the container.
 COPY . .
 
-# Accept VITE_API_URL as a build argument and expose it to Vite
+# Vite reads API settings during the build step.
 ARG VITE_API_URL=/api
 ENV VITE_API_URL=${VITE_API_URL}
 
-# Produce the optimised production bundle in /app/dist
+# Compile the admin panel into static files in /app/dist.
 RUN npm run build
 
-# ---------------------------------------------------------------------------
-# Stage 2: Serve the static assets with Nginx
-# ---------------------------------------------------------------------------
+# ---------- Stage 2: serve with Nginx ----------
 FROM nginx:alpine
 
-# Remove the default Nginx site
+# Remove the default Nginx static files.
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copy the custom Nginx configuration for SPA routing + API proxy
+# Copy the admin Nginx configuration with SPA and API proxy rules.
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy the built React app from the build stage
+# Copy the built admin panel from the previous stage.
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Expose port 80
+# Expose the internal HTTP port.
 EXPOSE 80
 
-# Start Nginx in the foreground
+# Run Nginx in the foreground.
 CMD ["nginx", "-g", "daemon off;"]

@@ -23,40 +23,37 @@ pipeline {
             }
         }
 
-        stage('Build and Run  mysql') {
+        stage('Run MongoDB') {
             steps {
-                echo 'create mysql image'
-                sh 'cd mysql'
-                sh 'docker build -t mysql .'
-                sh 'docker create network jerry-network'
-                sh 'docker volume create jerrys-mysql-data'
-                sh 'docker run -d --name jerrys-mysql --network jerry-network -e MYSQL_ROOT_PASSWORD=rootpassword -e MYSQL_DATABASE=jerrys_chaska -p 3306:3306 -v jerrys-mysql-data:/var/lib/mysql -v ${PWD}\init.sql:/docker-entrypoint-initdb.d/init.sql mysql'
-            }
-        }
-        stage('Build and Run  backend image') {
-            steps {
-                echo 'create backend image'
-                sh 'cd ..'
-                sh 'cd backend'
-                sh 'docker build -t jerrys-backend:1.0 .'
-                sh 'docker run -d --name jerrys-backend --network jerrys-network -p 5000:5000 -e PORT=5000 -e NODE_ENV=production -e DB_HOST=jerrys-mysql -e DB_PORT=3306 -e DB_USER=root -e DB_PASSWORD=rootpassword -e DB_NAME=jerrys_chaska -e JWT_SECRET=supersecret  -e FRONTEND_URL=http://${env.HOSTNAME}:3000 jerrys-backend:1.0'
+                echo 'Starting MongoDB container...'
+                sh 'docker network create jerry-network || true'
+                sh 'docker volume create jerrys-mongodb-data || true'
+                sh 'docker rm -f jerrys-mongodb || true'
+                sh 'docker run -d --name jerrys-mongodb --network jerry-network -e MONGO_INITDB_ROOT_USERNAME=admin -e MONGO_INITDB_ROOT_PASSWORD=secure_mongo_password -p 27017:27017 -v jerrys-mongodb-data:/data/db mongo:7'
             }
         }
 
-        stage('Build and Run  frontend image') {
+        stage('Build and Run Backend') {
             steps {
-                echo 'create frontend image'
-                sh 'cd ..'
-                sh 'cd frontend'
-                sh 'docker build --build-arg VITE_API_URL=http://${env.HOSTNAME}:5000/api -t jerrys-frontend:1.0 .'
-                sh 'docker run -d --name jerrys-frontend --network jerrys-network -p 3000:80 jerrys-frontend:1.0'
+                echo 'Building backend image...'
+                sh 'cd backend && docker build -t jerrys-backend:1.0 .'
+                sh 'docker rm -f jerrys-backend || true'
+                sh 'docker run -d --name jerrys-backend --network jerry-network -p 5000:5000 -e PORT=5000 -e NODE_ENV=production -e MONGO_URI=mongodb://admin:secure_mongo_password@jerrys-mongodb:27017/jerrys_chaska?authSource=admin -e JWT_SECRET=supersecret -e FRONTEND_URL=http://${env.HOSTNAME}:3000 jerrys-backend:1.0'
+            }
+        }
+
+        stage('Build and Run Frontend') {
+            steps {
+                echo 'Building frontend image...'
+                sh 'cd frontend && docker build --build-arg VITE_API_URL=http://${env.HOSTNAME}:5000/api -t jerrys-frontend:1.0 .'
+                sh 'docker rm -f jerrys-frontend || true'
+                sh 'docker run -d --name jerrys-frontend --network jerry-network -p 3000:80 jerrys-frontend:1.0'
             }
         }
 
         stage('Health Check') {
             steps {
-                echo 'Waiting for services to be ready...'
-                // Simple wait/check logic can be added here
+                echo 'Checking running containers...'
                 sh 'docker ps'
             }
         }
