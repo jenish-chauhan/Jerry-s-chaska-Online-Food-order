@@ -25,7 +25,7 @@ COPY src/ ./src/
 # Runtime environment variables expected by this container:
 # - MONGO_URI      MongoDB connection string
 # - JWT_SECRET     Secret used to sign auth tokens
-# - FRONTEND_URL   Allowed frontend/admin origins for CORS and sockets
+# - FRONTEND_URL   Comma-separated allowed frontend/admin origins for CORS and sockets
 # - PORT           Express server port (this app uses 5000 by default)
 # - NODE_ENV       Usually "production" in containers
 

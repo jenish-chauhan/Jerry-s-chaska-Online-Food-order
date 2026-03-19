@@ -14,7 +14,8 @@ const User = require("./models/User");
 const FoodItem = require("./models/FoodItem");
 const Order = require("./models/Order");
 const AdminSession = require("./models/AdminSession");
-const { getAllowedOrigins, initSocket } = require("./socket");
+const { buildExpressCorsOptions, getAllowedOrigins } = require("./config/cors");
+const { initSocket } = require("./socket");
 
 const app = express();
 const server = http.createServer(app);
@@ -22,7 +23,6 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
 const mongoUri =
   process.env.MONGO_URI || "mongodb://localhost:27017/jerrys_chaska";
-const allowedOrigins = getAllowedOrigins();
 const defaultMenuItems = [
   {
     name: "Classic Cheese Burger",
@@ -150,18 +150,7 @@ const cleanupDemoData = async () => {
 };
 
 app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  }),
+  cors(buildExpressCorsOptions()),
 );
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
@@ -191,8 +180,10 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
   console.error("API error:", err);
-  res.status(500).json({
-    error: "Internal server error",
+  const statusCode = err.status || 500;
+
+  res.status(statusCode).json({
+    error: statusCode === 403 ? "CORS origin denied" : "Internal server error",
     message: process.env.NODE_ENV === "development" ? err.message : undefined,
   });
 });
@@ -208,9 +199,16 @@ const startServer = async () => {
     initSocket(server);
 
     server.listen(PORT, () => {
+      const allowedOrigins = getAllowedOrigins();
+
       console.log(`\nBackend running on http://localhost:${PORT}`);
       console.log(`Health check: http://localhost:${PORT}/health`);
       console.log(`API ready at http://localhost:${PORT}/api`);
+      console.log(
+        `CORS allowed origins: ${
+          allowedOrigins.length > 0 ? allowedOrigins.join(", ") : "(none configured)"
+        }`,
+      );
       console.log(
         `\nConnected to MongoDB: ${mongoUri.split("@")[1] || "local"}\n`,
       );

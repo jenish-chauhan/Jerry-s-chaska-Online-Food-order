@@ -98,7 +98,7 @@ docker run -d `
   -e JWT_SECRET=your-super-secret-jwt-key-change-this `
   -e PORT=5000 `
   -e NODE_ENV=production `
-  -e FRONTEND_URL=http://localhost:5173 `
+  -e FRONTEND_URL=http://localhost:5173,http://localhost:8080 `
   -e ADMIN_EMAIL=jenishchauhan.08@gmail.com `
   -e ADMIN_PASSWORD=jerry@612 `
   -e ADMIN_NAME="Jenish Chauhan" `
@@ -165,9 +165,14 @@ docker run -d `
   -e JWT_SECRET=your-super-secret-jwt-key-change-this `
   -e PORT=5000 `
   -e NODE_ENV=production `
-  -e FRONTEND_URL=http://localhost:5173 `
+  -e FRONTEND_URL=http://localhost:5173,http://localhost:8080 `
   food-ordering-backend:latest
 ```
+
+`FRONTEND_URL` is a comma-separated list. You can pass exact origins such as
+`http://app.example.com:5173,http://admin.example.com:8080`, or a host without
+an explicit port such as `http://localhost` to allow that host on multiple
+ports.
 
 ## Health Checks
 

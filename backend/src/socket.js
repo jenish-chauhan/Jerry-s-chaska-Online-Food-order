@@ -1,30 +1,12 @@
 const jwt = require("jsonwebtoken");
 const { Server } = require("socket.io");
+const { buildSocketCorsOptions } = require("./config/cors");
 
 let io;
 
-const getAllowedOrigins = () => {
-  const configuredOrigins = (process.env.FRONTEND_URL || "")
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean);
-
-  return [
-    "http://localhost:5173",
-    "http://localhost:5174",
-    "http://localhost:8080",
-    "http://localhost",
-    ...configuredOrigins,
-  ];
-};
-
 const initSocket = (server) => {
   io = new Server(server, {
-    cors: {
-      origin: getAllowedOrigins(),
-      credentials: true,
-      methods: ["GET", "POST"],
-    },
+    cors: buildSocketCorsOptions(),
   });
 
   io.use((socket, next) => {
@@ -86,6 +68,5 @@ const emitOrderUpdated = (order) => {
 module.exports = {
   emitOrderCreated,
   emitOrderUpdated,
-  getAllowedOrigins,
   initSocket,
 };
