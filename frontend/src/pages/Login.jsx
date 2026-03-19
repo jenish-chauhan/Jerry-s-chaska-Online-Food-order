@@ -14,17 +14,28 @@ import {
 import MainLayout from "../layout/MainLayout";
 import { LogIn, Shield } from "lucide-react";
 
+const normalizeAdminLoginUrl = (baseUrl) => {
+  const url = new URL(baseUrl, window.location.origin);
+
+  // Always send users to the public admin login route.
+  if (!url.pathname || url.pathname === "/") {
+    url.pathname = "/login";
+  }
+
+  return url.toString();
+};
+
 const getAdminAppUrl = () => {
   if (import.meta.env.VITE_ADMIN_URL) {
-    return import.meta.env.VITE_ADMIN_URL;
+    return normalizeAdminLoginUrl(import.meta.env.VITE_ADMIN_URL);
   }
 
   const { protocol, hostname } = window.location;
   if (import.meta.env.DEV) {
-    return `${protocol}//${hostname}:5174`;
+    return normalizeAdminLoginUrl(`${protocol}//${hostname}:5174`);
   }
 
-  return `${protocol}//${hostname}:8080`;
+  return normalizeAdminLoginUrl(`${protocol}//${hostname}:8080`);
 };
 
 const Login = () => {

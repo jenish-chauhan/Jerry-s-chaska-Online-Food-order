@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -45,6 +46,41 @@ const Toast = ({ message, onClose }) => (
   </div>
 );
 
+const HomeRedirect = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <div
+          style={{
+            width: 36,
+            height: 36,
+            border: "3px solid var(--border)",
+            borderTopColor: "var(--primary)",
+            borderRadius: "50%",
+          }}
+          className="spin"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <Navigate
+      to={user?.role === "admin" ? "/dashboard" : "/login"}
+      replace
+    />
+  );
+};
+
 function App() {
   const [toast, setToast] = useState(null);
 
@@ -52,7 +88,7 @@ function App() {
     <AuthProvider>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<HomeRedirect />} />
         <Route
           path="/dashboard"
           element={
@@ -93,7 +129,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<HomeRedirect />} />
       </Routes>
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
     </AuthProvider>

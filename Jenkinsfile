@@ -1,73 +1,129 @@
 pipeline {
-    agent any
+  agent any
 
-    environment {
-        DOCKER_HUB_CREDENTIALS_ID = 'docker_hub'
-        GIT_REPO_URL = 'https://github.com/jenish-chauhan/Jerry-s-chaska-Online-Food-order.git'
+  triggers {
+    githubPush()
+  }
+
+  environment {
+    NAMESPACE = 'food-ordering'
+    IMAGE_TAG = "${BUILD_NUMBER}"
+
+    // Update this to your EC2 public IP or your domain.
+    PUBLIC_HOST = 'YOUR_EC2_PUBLIC_IP_OR_DOMAIN'
+
+    // Change to https if you put the app behind SSL later.
+    PUBLIC_PROTOCOL = 'http'
+
+    FRONTEND_PORT = '30080'
+    ADMIN_PORT = '30081'
+  }
+
+  stages {
+    stage('Checkout Code') {
+      steps {
+        checkout scm
+      }
     }
 
-    stages {
-        stage('git clone') {
-            steps {
-                echo 'Fetching project from GitHub...'
-                git branch: 'main', url: "${GIT_REPO_URL}"
-            }
-        }
+    stage('Build And Push Docker Images') {
+      steps {
+        withCredentials([
+          usernamePassword(
+            credentialsId: 'dockerhub-cred',
+            usernameVariable: 'DOCKERHUB_USERNAME',
+            passwordVariable: 'DOCKERHUB_PASSWORD'
+          )
+        ]) {
+          sh '''
+            set -e
 
-        stage('Docker Login') {
-            steps {
-                echo 'Authenticating with Docker Hub...'
-                withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDENTIALS_ID}", passwordVariable: 'DOCKER_HUB_PASSWORD', usernameVariable: 'DOCKER_HUB_USERNAME')]) {
-                    sh "echo ${DOCKER_HUB_PASSWORD} | docker login -u ${DOCKER_HUB_USERNAME} --password-stdin"
-                }
-            }
-        }
+            echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
 
-        stage('Run MongoDB') {
-            steps {
-                echo 'Starting MongoDB container...'
-                sh 'docker network create jerry-network || true'
-                sh 'docker volume create jerrys-mongodb-data || true'
-                sh 'docker rm -f jerrys-mongodb || true'
-                sh 'docker run -d --name jerrys-mongodb --network jerry-network -e MONGO_INITDB_ROOT_USERNAME=admin -e MONGO_INITDB_ROOT_PASSWORD=secure_mongo_password -p 27017:27017 -v jerrys-mongodb-data:/data/db mongo:7'
-            }
-        }
+            docker build -t $DOCKERHUB_USERNAME/food-ordering-backend:$IMAGE_TAG ./backend
 
-        stage('Build and Run Backend') {
-            steps {
-                echo 'Building backend image...'
-                sh 'cd backend && docker build -t jerrys-backend:1.0 .'
-                sh 'docker rm -f jerrys-backend || true'
-                sh 'docker run -d --name jerrys-backend --network jerry-network -p 5000:5000 -e PORT=5000 -e NODE_ENV=production -e MONGO_URI=mongodb://admin:secure_mongo_password@jerrys-mongodb:27017/jerrys_chaska?authSource=admin -e JWT_SECRET=supersecret -e FRONTEND_URL=http://${env.HOSTNAME}:3000 jerrys-backend:1.0'
-            }
-        }
+            docker build \
+              --build-arg VITE_API_URL=/api \
+              --build-arg VITE_ADMIN_URL=$PUBLIC_PROTOCOL://$PUBLIC_HOST:$ADMIN_PORT/login \
+              -t $DOCKERHUB_USERNAME/food-ordering-frontend:$IMAGE_TAG \
+              ./frontend
 
-        stage('Build and Run Frontend') {
-            steps {
-                echo 'Building frontend image...'
-                sh 'cd frontend && docker build --build-arg VITE_API_URL=http://${env.HOSTNAME}:5000/api -t jerrys-frontend:1.0 .'
-                sh 'docker rm -f jerrys-frontend || true'
-                sh 'docker run -d --name jerrys-frontend --network jerry-network -p 3000:80 jerrys-frontend:1.0'
-            }
-        }
+            docker build \
+              --build-arg VITE_API_URL=/api \
+              -t $DOCKERHUB_USERNAME/food-ordering-admin:$IMAGE_TAG \
+              ./admin-panel
 
-        stage('Health Check') {
-            steps {
-                echo 'Checking running containers...'
-                sh 'docker ps'
-            }
+            docker push $DOCKERHUB_USERNAME/food-ordering-backend:$IMAGE_TAG
+            docker push $DOCKERHUB_USERNAME/food-ordering-frontend:$IMAGE_TAG
+            docker push $DOCKERHUB_USERNAME/food-ordering-admin:$IMAGE_TAG
+          '''
         }
+      }
     }
 
-    post {
-        always {
-            echo 'Pipeline execution finished.'
+    stage('Deploy To Kubernetes') {
+      steps {
+        withCredentials([
+          usernamePassword(
+            credentialsId: 'dockerhub-cred',
+            usernameVariable: 'DOCKERHUB_USERNAME',
+            passwordVariable: 'DOCKERHUB_PASSWORD'
+          )
+        ]) {
+          sh '''
+            set -e
+
+            # IMPORTANT:
+            # kubectl must already be configured on this Jenkins/EC2 machine.
+            # Also make sure the Kubernetes secret "food-ordering-secret" already exists.
+
+            kubectl apply -f k8s/namespace.yml
+
+            kubectl create configmap backend-config \
+              -n $NAMESPACE \
+              --from-literal=PORT=5000 \
+              --from-literal=NODE_ENV=production \
+              --from-literal=FRONTEND_URL=http://frontend:80,http://admin-panel:80,$PUBLIC_PROTOCOL://$PUBLIC_HOST:$FRONTEND_PORT,$PUBLIC_PROTOCOL://$PUBLIC_HOST:$ADMIN_PORT \
+              --from-literal=MONGO_DATABASE=jerrys_chaska \
+              --dry-run=client -o yaml | kubectl apply -f -
+            kubectl apply -f k8s/secret.yml
+            kubectl apply -f k8s/mongodb-pvc.yml
+            kubectl apply -f k8s/mongodb-deployment.yml
+            kubectl apply -f k8s/mongodb-service.yml
+            kubectl apply -f k8s/backend-deployment.yml
+            kubectl apply -f k8s/backend-service.yml
+            kubectl apply -f k8s/frontend-deployment.yml
+            kubectl apply -f k8s/frontend-service.yml
+            kubectl apply -f k8s/admin-panel-deployment.yml
+            kubectl apply -f k8s/admin-panel-service.yml
+
+            kubectl set image deployment/backend \
+              backend=$DOCKERHUB_USERNAME/food-ordering-backend:$IMAGE_TAG \
+              -n $NAMESPACE
+
+            kubectl set image deployment/frontend \
+              frontend=$DOCKERHUB_USERNAME/food-ordering-frontend:$IMAGE_TAG \
+              -n $NAMESPACE
+
+            kubectl set image deployment/admin-panel \
+              admin-panel=$DOCKERHUB_USERNAME/food-ordering-admin:$IMAGE_TAG \
+              -n $NAMESPACE
+
+            kubectl rollout status deployment/mongodb -n $NAMESPACE --timeout=300s
+            kubectl rollout status deployment/backend -n $NAMESPACE --timeout=300s
+            kubectl rollout status deployment/frontend -n $NAMESPACE --timeout=300s
+            kubectl rollout status deployment/admin-panel -n $NAMESPACE --timeout=300s
+          '''
         }
-        success {
-            echo 'Deployment successful!'
-        }
-        failure {
-            echo 'Deployment failed. Please check the logs.'
-        }
+      }
     }
+  }
+
+  post {
+    always {
+      sh '''
+        docker logout || true
+      '''
+    }
+  }
 }
