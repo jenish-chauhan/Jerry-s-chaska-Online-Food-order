@@ -116,6 +116,22 @@ kubectl apply -f .\k8s\admin-panel-deployment.yml
 kubectl apply -f .\k8s\admin-panel-service.yml
 ```
 
+# linux
+
+kubectl apply -f namespace.yml
+kubectl apply -f app-secret.yml
+kubectl apply -f backend-config.yml
+kubectl apply -f mongodb-pvc.yml
+kubectl apply -f mongodb-deployment.yml
+kubectl apply -f mongodb-service.yml
+
+kubectl apply -f backend-deployment.yml
+kubectl apply -f backend-service.yml
+kubectl apply -f frontend-deployment.yml
+kubectl apply -f frontend-service.yml
+kubectl apply -f admin-panel-deployment.yml
+kubectl apply -f admin-panel-service.yml
+
 Or apply the whole folder after the namespace exists:
 
 ```powershell
