@@ -15,8 +15,8 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: jenishchauhan/food-ordering-frontend:latest
-          imagePullPolicy: IfNotPresent
+          image: jenishchauhan/food-ordering-frontend
+
           ports:
             - containerPort: 80
           readinessProbe:
