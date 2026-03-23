@@ -15,8 +15,8 @@ spec:
     spec:
       containers:
         - name: admin-panel
-          image: food-ordering-admin:latest
-          imagePullPolicy: IfNotPresent
+          image: jenishchauhan/food-ordering-admin:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
           readinessProbe:

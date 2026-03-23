@@ -24,7 +24,7 @@ COPY . .
 # Vite reads these values at build time, not at runtime.
 # VITE_API_URL is usually /api because Nginx proxies API requests to backend.
 ARG VITE_API_URL=/api
-ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_API_URL=${VITE_API_URL} s
 
 # VITE_ADMIN_URL is used when the customer app redirects to the admin panel.
 ARG VITE_ADMIN_URL=http://localhost:8080

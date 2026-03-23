@@ -15,64 +15,84 @@ spec:
     spec:
       containers:
         - name: backend
-          image: food-ordering-backend:latest
-          imagePullPolicy: IfNotPresent
+          image: jenishchauhan/food-ordering-backend:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 5000
+
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+
           env:
             - name: PORT
               valueFrom:
                 configMapKeyRef:
                   name: backend-config
                   key: PORT
+
             - name: NODE_ENV
               valueFrom:
                 configMapKeyRef:
                   name: backend-config
                   key: NODE_ENV
+
             - name: FRONTEND_URL
               valueFrom:
                 configMapKeyRef:
                   name: backend-config
                   key: FRONTEND_URL
+
             - name: ADMIN_EMAIL
               valueFrom:
                 secretKeyRef:
                   name: food-ordering-secret
                   key: admin-email
+
             - name: ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: food-ordering-secret
                   key: admin-password
+
             - name: ADMIN_NAME
               valueFrom:
                 secretKeyRef:
                   name: food-ordering-secret
                   key: admin-name
+
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: food-ordering-secret
                   key: jwt-secret
+
             - name: MONGO_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: food-ordering-secret
                   key: mongo-root-username
+
             - name: MONGO_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: food-ordering-secret
                   key: mongo-root-password
+
             - name: MONGO_URI
               value: mongodb://$(MONGO_USERNAME):$(MONGO_PASSWORD)@mongodb:27017/jerrys_chaska?authSource=admin
+
           readinessProbe:
             httpGet:
               path: /health
               port: 5000
             initialDelaySeconds: 15
             periodSeconds: 10
+
           livenessProbe:
             httpGet:
               path: /health

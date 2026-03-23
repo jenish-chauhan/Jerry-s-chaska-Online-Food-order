@@ -5,6 +5,9 @@ metadata:
   namespace: food-ordering
 data:
   PORT: "5000"
-  NODE_ENV: "production"
-  FRONTEND_URL: "http://frontend:80,http://admin-panel:80,http://localhost:30080,http://localhost:30081,http://192.168.49.2:30080,http://192.168.49.2:30081 ,http://http://54.81.59.216:30080,http://54.81.59.216:30081"
+  NODE_ENV: "development"
+
+  # Internal Kubernetes communication
+  FRONTEND_URL: "http://frontend"
+
   MONGO_DATABASE: "jerrys_chaska"
