@@ -127,7 +127,7 @@ kubectl apply -f mongodb-service.yml
 
 kubectl apply -f backend-deployment.yml
 kubectl apply -f backend-service.yml
-kubectl apply -f frontend-deployment.yml
+  kubectl apply -f frontend-deployment.yml
 kubectl apply -f frontend-service.yml
 kubectl apply -f admin-panel-deployment.yml
 kubectl apply -f admin-panel-service.yml
