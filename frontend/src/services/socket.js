@@ -1,8 +1,5 @@
 import { io } from "socket.io-client";
-
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.DEV ? "http://localhost:5000/api" : "/api");
+import { API_URL } from "../config/runtime";
 
 const SOCKET_URL = API_URL.startsWith("http")
   ? API_URL.replace(/\/api\/?$/, "")

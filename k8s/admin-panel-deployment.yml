@@ -15,8 +15,11 @@ spec:
     spec:
       containers:
         - name: admin-panel
-          image: jenishchauhan/food-ordering-admin:latest
+          image: food-ordering-admin:latest
           imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: web-config
           ports:
             - containerPort: 80
           readinessProbe:

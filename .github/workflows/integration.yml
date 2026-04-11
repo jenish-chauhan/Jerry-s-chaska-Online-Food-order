@@ -16,17 +16,10 @@ jobs:
         run: docker build -t jenishchauhan/food-ordering-backend:latest ./backend
 
       - name: Build the Docker frontend image
-        run: |
-          docker build \
-          --build-arg VITE_API_URL=http://backend:5000 \
-          --build-arg VITE_ADMIN_URL=http://admin-panel \
-          -t jenishchauhan/food-ordering-frontend:latest ./frontend
+        run: docker build -t jenishchauhan/food-ordering-frontend:latest ./frontend
 
       - name: Build the admin panel image
-        run: |
-          docker build \
-          --build-arg VITE_API_URL=http://backend:5000 \
-          -t jenishchauhan/food-ordering-admin:latest ./admin-panel
+        run: docker build -t jenishchauhan/food-ordering-admin:latest ./admin-panel
 
       # Login once
       - name: Login to Docker Hub

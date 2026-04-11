@@ -10,11 +10,11 @@ const About = () => {
                     {/* Header */}
                     <div className="text-center mb-12">
                         <div className="inline-flex items-center gap-3 mb-4">
-                            <span className="text-5xl">🍔</span>
-                            <h1 className="text-4xl font-extrabold text-secondary">About Jerry's Chaska</h1>
+                            <span className="text-5xl">{'\u{1F354}'}</span>
+                            <h1 className="text-4xl font-extrabold text-secondary">About Our Food Ordering System</h1>
                         </div>
                         <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                            Bringing authentic street food flavors to your doorstep since day one
+                            A complete digital solution for menu browsing, food ordering, and order management
                         </p>
                     </div>
 
@@ -24,13 +24,13 @@ const About = () => {
                             <h2 className="text-3xl font-bold text-secondary mb-4">Our Story</h2>
                             <div className="space-y-4 text-gray-700 leading-relaxed">
                                 <p>
-                                    Jerry's Chaska was born from a simple passion: bringing the vibrant, authentic flavors of street food to food lovers everywhere. What started as a small venture in Junagadh, Gujarat, has grown into a beloved destination for those craving genuine, delicious fast food.
+                                    This application was built to modernize the food ordering experience for both customers and administrators. It combines menu access, cart handling, and order placement into one easy-to-use platform.
                                 </p>
                                 <p>
-                                    We believe that great food doesn't have to be complicated. Our menu celebrates the rich culinary heritage of Indian street food, from crispy samosas to juicy burgers, all prepared with the freshest ingredients and served with love.
+                                    Customers can explore food items, place orders quickly, and enjoy a smoother digital experience. On the management side, administrators can organize menu items, monitor incoming orders, and handle daily operations more efficiently.
                                 </p>
                                 <p>
-                                    Every dish we serve is a testament to our commitment to quality, hygiene, and authentic taste. We're not just serving food; we're creating experiences and memories, one delicious bite at a time.
+                                    The system represents more than online ordering. It is a practical order management solution designed to improve speed, accuracy, convenience, and service quality across the entire workflow.
                                 </p>
                             </div>
                         </div>
@@ -39,17 +39,17 @@ const About = () => {
                             <h2 className="text-3xl font-bold text-secondary mb-4">Our Mission</h2>
                             <div className="space-y-4 text-gray-700 leading-relaxed">
                                 <p>
-                                    At Jerry's Chaska, our mission is simple yet powerful: to deliver happiness through food. We strive to:
+                                    Our mission is to make food ordering and order management simple, reliable, and efficient for every user. This system is designed to:
                                 </p>
                                 <ul className="list-disc list-inside space-y-2 ml-4">
-                                    <li>Serve only the highest quality, freshest ingredients</li>
-                                    <li>Maintain strict hygiene and safety standards</li>
-                                    <li>Provide fast, reliable delivery service</li>
-                                    <li>Offer authentic flavors at affordable prices</li>
-                                    <li>Create a welcoming experience for every customer</li>
+                                    <li>Provide a fast and user-friendly food ordering experience</li>
+                                    <li>Help administrators manage menus and orders effectively</li>
+                                    <li>Support clear order tracking and status handling</li>
+                                    <li>Reduce manual work through organized digital workflows</li>
+                                    <li>Deliver a dependable experience for both customers and admins</li>
                                 </ul>
                                 <p className="mt-4">
-                                    We're committed to making every meal memorable, whether it's a quick lunch break or a family dinner. Your satisfaction is our success.
+                                    We aim to create a system that connects ordering, management, and service into one smooth and efficient process every day.
                                 </p>
                             </div>
                         </div>
@@ -83,8 +83,8 @@ const About = () => {
                             </CardHeader>
                             <CardContent className="text-center">
                                 <p className="text-white">
-                                    Junagadh, Gujarat<br />
-                                    India
+                                    Customer ordering panel<br />
+                                    Admin management dashboard
                                 </p>
                             </CardContent>
                         </Card>
@@ -98,8 +98,8 @@ const About = () => {
                             </CardHeader>
                             <CardContent className="text-center">
                                 <p className="text-white">
-                                    Available 9 AM - 10 PM<br />
-                                    Every day
+                                    Order updates and support<br />
+                                    Available throughout the platform
                                 </p>
                             </CardContent>
                         </Card>
@@ -110,24 +110,24 @@ const About = () => {
                         <h2 className="text-3xl font-bold text-secondary text-center mb-8">Our Values</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             <div className="text-center">
-                                <div className="text-4xl mb-3">🌟</div>
-                                <h3 className="text-xl font-bold text-secondary mb-2">Quality First</h3>
+                                <div className="text-4xl mb-3">{'\u{1F31F}'}</div>
+                                <h3 className="text-xl font-bold text-secondary mb-2">Reliable Ordering</h3>
                                 <p className="text-gray-600">
-                                    We never compromise on the quality of our ingredients or preparation
+                                    Built to support consistent menu browsing, cart handling, and order placement
                                 </p>
                             </div>
                             <div className="text-center">
-                                <div className="text-4xl mb-3">❤️</div>
-                                <h3 className="text-xl font-bold text-secondary mb-2">Customer Love</h3>
+                                <div className="text-4xl mb-3">{'\u2764\uFE0F'}</div>
+                                <h3 className="text-xl font-bold text-secondary mb-2">Smooth Experience</h3>
                                 <p className="text-gray-600">
-                                    Your satisfaction and happiness are at the heart of everything we do
+                                    Designed to make the journey simple and efficient for both customers and administrators
                                 </p>
                             </div>
                             <div className="text-center">
-                                <div className="text-4xl mb-3">🚀</div>
-                                <h3 className="text-xl font-bold text-secondary mb-2">Fast Service</h3>
+                                <div className="text-4xl mb-3">{'\u{1F680}'}</div>
+                                <h3 className="text-xl font-bold text-secondary mb-2">Smart Management</h3>
                                 <p className="text-gray-600">
-                                    Quick delivery without compromising on quality or taste
+                                    Helps teams manage orders, updates, and daily food service operations with ease
                                 </p>
                             </div>
                         </div>

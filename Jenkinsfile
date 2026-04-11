@@ -42,16 +42,9 @@ pipeline {
 
             docker build -t $DOCKERHUB_USERNAME/food-ordering-backend:$IMAGE_TAG ./backend
 
-            docker build \
-              --build-arg VITE_API_URL=/api \
-              --build-arg VITE_ADMIN_URL=$PUBLIC_PROTOCOL://$PUBLIC_HOST:$ADMIN_PORT/login \
-              -t $DOCKERHUB_USERNAME/food-ordering-frontend:$IMAGE_TAG \
-              ./frontend
+            docker build -t $DOCKERHUB_USERNAME/food-ordering-frontend:$IMAGE_TAG ./frontend
 
-            docker build \
-              --build-arg VITE_API_URL=/api \
-              -t $DOCKERHUB_USERNAME/food-ordering-admin:$IMAGE_TAG \
-              ./admin-panel
+            docker build -t $DOCKERHUB_USERNAME/food-ordering-admin:$IMAGE_TAG ./admin-panel
 
             docker push $DOCKERHUB_USERNAME/food-ordering-backend:$IMAGE_TAG
             docker push $DOCKERHUB_USERNAME/food-ordering-frontend:$IMAGE_TAG
@@ -85,6 +78,11 @@ pipeline {
               --from-literal=NODE_ENV=production \
               --from-literal=FRONTEND_URL=http://frontend:80,http://admin-panel:80,$PUBLIC_PROTOCOL://$PUBLIC_HOST:$FRONTEND_PORT,$PUBLIC_PROTOCOL://$PUBLIC_HOST:$ADMIN_PORT \
               --from-literal=MONGO_DATABASE=jerrys_chaska \
+              --dry-run=client -o yaml | kubectl apply -f -
+            kubectl create configmap web-config \
+              -n $NAMESPACE \
+              --from-literal=APP_API_URL=/api \
+              --from-literal=APP_ADMIN_URL=$PUBLIC_PROTOCOL://$PUBLIC_HOST:$ADMIN_PORT \
               --dry-run=client -o yaml | kubectl apply -f -
             kubectl apply -f k8s/secret.yml
             kubectl apply -f k8s/mongodb-pvc.yml

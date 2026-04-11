@@ -49,9 +49,6 @@ services:
   frontend:
     build:
       context: ./frontend
-      args:
-        VITE_API_URL: /api
-        VITE_ADMIN_URL: http://localhost:8080
     container_name: jerrys_chaska_frontend
     ports:
       - "5173:80"
@@ -59,14 +56,12 @@ services:
       - backend
     restart: unless-stopped
     environment:
-      - VITE_API_URL=/api
-      - VITE_ADMIN_URL=http://localhost:8080
+      - APP_API_URL=/api
+      - APP_ADMIN_URL=http://localhost:8080
 
   admin-panel:
     build:
       context: ./admin-panel
-      args:
-        VITE_API_URL: /api
     container_name: jerrys_chaska_admin
     ports:
       - "8080:80"
@@ -74,7 +69,7 @@ services:
       - backend
     restart: unless-stopped
     environment:
-      - VITE_API_URL=/api
+      - APP_API_URL=/api
 
 volumes:
   mongodb_data:

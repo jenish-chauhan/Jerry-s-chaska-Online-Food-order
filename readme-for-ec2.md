@@ -13,10 +13,10 @@ The current application stack is:
 
 Before you build and push images to Docker Hub, keep these points in mind:
 
-1. Build frontend images with the correct public admin URL.
-   The customer frontend uses `VITE_ADMIN_URL` for redirecting admin users.
+1. Build one reusable frontend image and set the public admin URL at runtime.
+   The customer frontend now reads `APP_ADMIN_URL` from Kubernetes `web-config`.
 
-2. Keep `VITE_API_URL=/api` for both frontend apps.
+2. Keep `APP_API_URL=/api` for both frontend apps.
    Do not hardcode the backend public URL in the frontend image when using the current Nginx proxy setup.
    The frontend and admin panel already proxy `/api` internally to the Kubernetes `backend` service.
 
@@ -124,23 +124,15 @@ docker build -t <DOCKERHUB_USERNAME>/food-ordering-backend:<TAG> ./backend
 ### Frontend
 
 Use `/api` so Nginx proxies requests to the internal `backend` Kubernetes service.
-Set the admin URL to the EC2 public entry point for the admin panel.
 
 ```bash
-docker build \
-  --build-arg VITE_API_URL=/api \
-  --build-arg VITE_ADMIN_URL=http://<EC2_PUBLIC_IP>:30081 \
-  -t <DOCKERHUB_USERNAME>/food-ordering-frontend:<TAG> \
-  ./frontend
+docker build -t <DOCKERHUB_USERNAME>/food-ordering-frontend:<TAG> ./frontend
 ```
 
 ### Admin Panel
 
 ```bash
-docker build \
-  --build-arg VITE_API_URL=/api \
-  -t <DOCKERHUB_USERNAME>/food-ordering-admin:<TAG> \
-  ./admin-panel
+docker build -t <DOCKERHUB_USERNAME>/food-ordering-admin:<TAG> ./admin-panel
 ```
 
 ## 7. Push Images To Docker Hub
@@ -181,6 +173,7 @@ Apply the config and workloads:
 
 ```bash
 kubectl apply -f k8s/backend-config.yml
+kubectl apply -f k8s/web-config.yml
 kubectl apply -f k8s/mongodb-pvc.yml
 kubectl apply -f k8s/mongodb-deployment.yml
 kubectl apply -f k8s/mongodb-service.yml
@@ -218,6 +211,21 @@ kubectl rollout status deployment/mongodb -n food-ordering
 kubectl rollout status deployment/backend -n food-ordering
 kubectl rollout status deployment/frontend -n food-ordering
 kubectl rollout status deployment/admin-panel -n food-ordering
+```
+
+If your public EC2 address is different from the default checked into
+`k8s/web-config.yml`, update that file first:
+
+```yaml
+APP_API_URL: /api
+APP_ADMIN_URL: http://<EC2_PUBLIC_IP>:30081
+```
+
+Then apply it again and restart the frontend deployment if needed:
+
+```bash
+kubectl apply -f k8s/web-config.yml
+kubectl rollout restart deployment/frontend -n food-ordering
 ```
 
 ## 11. Verify Connectivity
@@ -300,14 +308,15 @@ git clone <YOUR_REPO_URL>
 cd FOOD-ORDERING-SYS
 docker login
 docker build -t <DOCKERHUB_USERNAME>/food-ordering-backend:<TAG> ./backend
-docker build --build-arg VITE_API_URL=/api --build-arg VITE_ADMIN_URL=http://<EC2_PUBLIC_IP>:30081 -t <DOCKERHUB_USERNAME>/food-ordering-frontend:<TAG> ./frontend
-docker build --build-arg VITE_API_URL=/api -t <DOCKERHUB_USERNAME>/food-ordering-admin:<TAG> ./admin-panel
+docker build -t <DOCKERHUB_USERNAME>/food-ordering-frontend:<TAG> ./frontend
+docker build -t <DOCKERHUB_USERNAME>/food-ordering-admin:<TAG> ./admin-panel
 docker push <DOCKERHUB_USERNAME>/food-ordering-backend:<TAG>
 docker push <DOCKERHUB_USERNAME>/food-ordering-frontend:<TAG>
 docker push <DOCKERHUB_USERNAME>/food-ordering-admin:<TAG>
 kubectl apply -f k8s/namespace.yml
 kubectl create secret generic food-ordering-secret -n food-ordering --from-literal=mongo-root-username=admin --from-literal=mongo-root-password='<STRONG_MONGO_PASSWORD>' --from-literal=jwt-secret='<STRONG_JWT_SECRET>' --from-literal=admin-email='<ADMIN_EMAIL>' --from-literal=admin-password='<STRONG_ADMIN_PASSWORD>' --from-literal=admin-name='<ADMIN_NAME>' --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -f k8s/backend-config.yml
+kubectl apply -f k8s/web-config.yml
 kubectl apply -f k8s/mongodb-pvc.yml
 kubectl apply -f k8s/mongodb-deployment.yml
 kubectl apply -f k8s/mongodb-service.yml

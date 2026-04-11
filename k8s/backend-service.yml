@@ -4,9 +4,10 @@ metadata:
   name: backend
   namespace: food-ordering
 spec:
+  type: NodePort # 🔥 CHANGE THIS
   selector:
     app: backend
   ports:
-    - protocol: TCP
-      port: 5000
+    - port: 5000
       targetPort: 5000
+      nodePort: 30082 # choose any free port (30000–32767)

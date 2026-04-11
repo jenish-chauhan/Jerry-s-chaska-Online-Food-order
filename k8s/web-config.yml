@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web-config
+  namespace: food-ordering
+data:
+  # IMPORTANT:
+  # APP_API_URL is used inside the BROWSER, not inside Kubernetes pods.
+  #
+  # In Minikube/Kubernetes, keep this as "/api" so the frontend/admin Nginx
+  # container can proxy requests internally to: http://backend:5000/api
+  #
+  # DO NOT write "http://backend:5000" here:
+  # - service names like "backend" work only inside pods/containers
+  # - the browser on your laptop cannot resolve Kubernetes service names
+  #
+  # DO NOT write "http://<minikube-ip>:30082" here for normal setup:
+  # - that makes the browser call the backend NodePort directly
+  # - it often causes timeout/CORS issues in local Minikube setups
+  #
+  # Correct value for API in this project:
+  APP_API_URL: "/api"
+
+  # IMPORTANT:
+  # APP_ADMIN_URL is used by the frontend when redirecting to the admin panel.
+  # This value MUST be a browser-accessible URL.
+  #
+  # Use one of these depending on your setup:
+  # - http://127.0.0.1:30081
+  #   Use this when you run:
+  #   kubectl port-forward -n food-ordering svc/admin-panel 30081:80
+  #
+  # - http://<minikube-ip>:30081
+  #   Use this only if your machine can really open the Minikube IP directly.
+  #
+  # - the exact output of:
+  #   minikube service admin-panel -n food-ordering --url
+  #   On Windows/Docker driver this is often the only directly reachable URL,
+  #   but it may change every time.
+  #
+  # DO NOT write "http://admin-panel" here because that is only a Kubernetes
+  # service name and will not open in the browser.
+  #
+  # Current local-practice choice:
+  # use localhost + port-forward so the frontend redirect works reliably.
+
+  #if you are using ec2 then you write the public ip of ec2 and port number 30081
+  APP_ADMIN_URL: "http://127.0.0.1:30081"

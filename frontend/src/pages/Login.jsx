@@ -13,6 +13,7 @@ import {
 } from "../components/ui/Card";
 import MainLayout from "../layout/MainLayout";
 import { LogIn, Shield } from "lucide-react";
+import { ADMIN_URL } from "../config/runtime";
 
 const normalizeAdminLoginUrl = (baseUrl) => {
   const url = new URL(baseUrl, window.location.origin);
@@ -26,8 +27,8 @@ const normalizeAdminLoginUrl = (baseUrl) => {
 };
 
 const getAdminAppUrl = () => {
-  if (import.meta.env.VITE_ADMIN_URL) {
-    return normalizeAdminLoginUrl(import.meta.env.VITE_ADMIN_URL);
+  if (ADMIN_URL) {
+    return normalizeAdminLoginUrl(ADMIN_URL);
   }
 
   const { protocol, hostname } = window.location;

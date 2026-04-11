@@ -15,8 +15,10 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: jenishchauhan/food-ordering-frontend
-
+          image: food-ordering-frontend:1.0
+          envFrom:
+            - configMapRef:
+                name: web-config
           ports:
             - containerPort: 80
           readinessProbe:
