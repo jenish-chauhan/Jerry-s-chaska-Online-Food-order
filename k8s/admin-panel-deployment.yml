@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: admin-panel
-          image: food-ordering-admin:latest
+          image: jenishchauhan/food-ordering-admin:latest
           imagePullPolicy: Always
           envFrom:
             - configMapRef:

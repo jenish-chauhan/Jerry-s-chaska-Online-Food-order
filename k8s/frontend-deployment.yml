@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: food-ordering-frontend:1.0
+          image: jenishchauhan/food-ordering-frontend:latest
           envFrom:
             - configMapRef:
                 name: web-config
