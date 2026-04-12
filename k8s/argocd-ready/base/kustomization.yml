@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# This is the GitOps base for the application.
+# It groups the Kubernetes manifests that Argo CD should render together.
+#
+# Important:
+# - The original manifests in the parent `k8s/` folder were not changed.
+# - This base contains the Argo CD/Kustomize-ready copies so Argo CD can
+#   build from one self-contained directory.
+resources:
+  - namespace.yml
+  - app-secret.yml
+  - backend-config.yml
+  - web-config.yml
+  - mongodb-pvc.yml
+  - mongodb-deployment.yml
+  - mongodb-service.yml
+  - backend-deployment.yml
+  - backend-service.yml
+  - frontend-deployment.yml
+  - frontend-service.yml
+  - admin-panel-deployment.yml
+  - admin-panel-service.yml

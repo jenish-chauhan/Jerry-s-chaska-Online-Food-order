@@ -1,151 +1,90 @@
-# Kubernetes Setup
+# Kubernetes And Argo CD Workflow
 
-This folder contains the Kubernetes manifests for:
+This folder now supports two ways to deploy the app:
 
-- `mongodb`
-- `backend`
-- `frontend`
-- `admin-panel`
+1. Direct Kubernetes apply for local/manual testing.
+2. Argo CD + Kustomize for automatic CD to AWS EKS.
 
-## Important Change
+The original manifests in `k8s/` were not changed.  
+The GitOps-ready structure lives in `k8s/argocd-ready/`.
 
-The frontend and admin images no longer need Docker `--build-arg` values.
-Both apps now read browser config at container startup from the `web-config`
-ConfigMap, so the same image can be reused across Docker, Minikube, Docker Hub,
-and Kubernetes environments.
+## Folder Flow
 
-## Files
+```text
+k8s/
+|-- namespace.yml
+|-- app-secret.yml
+|-- backend-config.yml
+|-- web-config.yml
+|-- mongodb-*.yml
+|-- backend-*.yml
+|-- frontend-*.yml
+|-- admin-panel-*.yml
+`-- argocd-ready/
+    |-- base/
+    |   |-- kustomization.yml
+    |   `-- copied Kubernetes manifests used by GitOps
+    |-- overlays/
+    |   `-- eks/
+    |       `-- kustomization.yml
+    `-- argocd/
+        `-- application.yml
+```
 
-- `namespace.yml`
-- `app-secret.yml`
-- `backend-config.yml`
-- `web-config.yml`
-- `mongodb-pvc.yml`
-- `mongodb-deployment.yml`
-- `mongodb-service.yml`
-- `backend-deployment.yml`
-- `backend-service.yml`
-- `frontend-deployment.yml`
-- `frontend-service.yml`
-- `admin-panel-deployment.yml`
-- `admin-panel-service.yml`
+## How The Argo CD Flow Works
 
-## 1. Build Docker Images
+1. You push code and Kubernetes changes to your Git repository.
+2. Argo CD watches the path `k8s/argocd-ready/overlays/eks`.
+3. That overlay points to `k8s/argocd-ready/base`.
+4. The base contains the Kubernetes resources Argo CD should render and apply.
+5. Argo CD compares Git with your EKS cluster.
+6. If something changed, Argo CD syncs it automatically to the `food-ordering` namespace.
+
+In short:
+
+```text
+Git push -> Argo CD watches repo -> Kustomize builds overlay -> Argo CD syncs to EKS
+```
+
+## How Kustomization Works Here
+
+`base/kustomization.yml`:
+
+- Bundles all app manifests into one deployable unit.
+- Keeps the GitOps input self-contained for Argo CD.
+
+`overlays/eks/kustomization.yml`:
+
+- Reuses the base for AWS EKS.
+- Is the path Argo CD should track.
+- Is the correct place to add future EKS-only patches.
+
+Right now the EKS overlay does not change the resources. That is intentional so
+the deployed behavior stays aligned with your current manifests.
+
+## Important Note For EKS
+
+Your current Services are still `NodePort` because you asked not to change the
+existing Kubernetes manifests.
+
+That means:
+
+- Argo CD can deploy the app to EKS successfully.
+- External access on EKS will still follow the current `NodePort` design.
+- For a production-style EKS setup, you would usually add an overlay patch later
+  for `LoadBalancer` or `Ingress`.
+
+## Commands To Run The App Manually
 
 Run these from the project root:
 
 ```powershell
 cd c:\xampp\htdocs\FOOD-ORDERING-SYS
-
-docker build -t food-ordering-backend:latest .\backend
-docker build -t food-ordering-frontend:latest .\frontend
-docker build -t food-ordering-admin:latest .\admin-panel
-docker pull mongo:7
-```
-
-## 2. Make Images Available To Kubernetes
-
-### Minikube
-
-```powershell
-minikube image load food-ordering-backend:latest
-minikube image load food-ordering-frontend:latest
-minikube image load food-ordering-admin:latest
-minikube image load mongo:7
-```
-
-If you reused the same image tag:
-
-```powershell
-kubectl rollout restart deployment/backend -n food-ordering
-kubectl rollout restart deployment/frontend -n food-ordering
-kubectl rollout restart deployment/admin-panel -n food-ordering
-```
-
-### kind
-
-```powershell
-kind load docker-image food-ordering-backend:latest
-kind load docker-image food-ordering-frontend:latest
-kind load docker-image food-ordering-admin:latest
-kind load docker-image mongo:7
-```
-
-### Docker Desktop Kubernetes
-
-Local Docker images are usually available directly.
-
-## 3. Configure The Public Browser URLs
-
-The `web-config` ConfigMap controls the runtime browser settings:
-
-- `APP_API_URL=/api`
-- `APP_ADMIN_URL=http://localhost:30081`
-
-Default local port-forward setup already matches the checked-in file:
-
-```powershell
-kubectl apply -f .\k8s\web-config.yml
-```
-
-If you want to use Minikube NodePort directly instead of port-forwarding, update
-`APP_ADMIN_URL` to your real public admin URL before applying:
-
-```powershell
-minikube ip
-```
-
-Then edit `k8s\web-config.yml` and change:
-
-```yaml
-APP_ADMIN_URL: http://<MINIKUBE_IP>:30081
-```
-
-## 4. Apply Kubernetes Files
-
-```powershell
-kubectl apply -f .\k8s\namespace.yml
-kubectl apply -f .\k8s\app-secret.yml
-kubectl apply -f .\k8s\backend-config.yml
-kubectl apply -f .\k8s\web-config.yml
-kubectl apply -f .\k8s\mongodb-pvc.yml
-kubectl apply -f .\k8s\mongodb-deployment.yml
-kubectl apply -f .\k8s\mongodb-service.yml
-kubectl apply -f .\k8s\backend-deployment.yml
-kubectl apply -f .\k8s\backend-service.yml
-kubectl apply -f .\k8s\frontend-deployment.yml
-kubectl apply -f .\k8s\frontend-service.yml
-kubectl apply -f .\k8s\admin-panel-deployment.yml
-kubectl apply -f .\k8s\admin-panel-service.yml
-```
-
-Or after the namespace exists:
-
-```powershell
-kubectl apply -f .\k8s
-```
-
-## 5. Check Status
-
-```powershell
+kubectl apply -k .\k8s\argocd-ready\overlays\eks
 kubectl get all -n food-ordering
-kubectl get pods -n food-ordering
-kubectl get svc -n food-ordering
 ```
 
-If something is not starting:
-
-```powershell
-kubectl describe pod -n food-ordering <pod-name>
-kubectl logs -n food-ordering deployment/mongodb
-kubectl logs -n food-ordering deployment/backend
-kubectl logs -n food-ordering deployment/frontend
-kubectl logs -n food-ordering deployment/admin-panel
-```
-
-## 6. Access The Application
-
-### Option A: Port-forward
+To open the frontend and admin panel locally:
 
 ```powershell
 kubectl port-forward -n food-ordering svc/frontend 30080:80
@@ -155,18 +94,7 @@ kubectl port-forward -n food-ordering svc/admin-panel 30081:80
 Open:
 
 - Frontend: `http://localhost:30080`
-- Admin Panel: `http://localhost:30081`
-
-### Option B: Minikube NodePort
-
-```powershell
-minikube ip
-```
-
-Open:
-
-- Frontend: `http://<MINIKUBE_IP>:30080`
-- Admin Panel: `http://<MINIKUBE_IP>:30081`
+- Admin panel: `http://localhost:30081`
 
 For backend API testing:
 
@@ -174,32 +102,66 @@ For backend API testing:
 kubectl port-forward -n food-ordering svc/backend 5000:5000
 ```
 
-Then:
+Open:
 
 - Health: `http://localhost:5000/health`
-- API: `http://localhost:5000/api/menu`
+- API sample: `http://localhost:5000/api/menu`
 
-## 7. Changing The Admin Redirect Later
+## Commands To Deploy With Argo CD
 
-You no longer need to rebuild the frontend image just to change the admin URL.
-Update the ConfigMap and restart the frontend deployment:
+Make sure:
 
-```powershell
-kubectl apply -f .\k8s\web-config.yml
-kubectl rollout restart deployment/frontend -n food-ordering
-```
+- Your code is pushed to a Git repository.
+- Argo CD is installed and connected to your EKS cluster.
+- You update `k8s/argocd-ready/argocd/application.yml` with your real Git repo URL.
 
-If the browser still uses the old value, hard refresh once so cached files are
-not reused.
-
-## 8. Connectivity Map
-
-- `frontend` -> `backend:5000`
-- `admin-panel` -> `backend:5000`
-- `backend` -> `mongodb:27017`
-
-## 9. Delete Everything
+Check the rendered manifests before Argo CD uses them:
 
 ```powershell
-kubectl delete namespace food-ordering
+kubectl kustomize .\k8s\argocd-ready\overlays\eks
 ```
+
+Create the Argo CD application:
+
+```powershell
+kubectl apply -n argocd -f .\k8s\argocd-ready\argocd\application.yml
+```
+
+Check application status:
+
+```powershell
+kubectl get applications -n argocd
+kubectl describe application food-ordering-eks -n argocd
+```
+
+If you want to open the Argo CD UI locally:
+
+```powershell
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
+
+Then open `https://localhost:8080`.
+
+## What You Update Later
+
+When you want a new deployment through Argo CD, usually you change one of these:
+
+- container image tags
+- ConfigMap values
+- Secret values
+- EKS overlay patches
+
+After you commit and push, Argo CD detects the Git change and syncs the cluster
+automatically because `automated` sync is enabled in `application.yml`.
+
+## Recommended Next Step
+
+Before applying on EKS, review these files once:
+
+- `k8s/argocd-ready/argocd/application.yml`
+- `k8s/argocd-ready/overlays/eks/kustomization.yml`
+- `k8s/argocd-ready/base/app-secret.yml`
+
+The secret file currently contains plain values in Git. That works technically,
+but for real production use you should later move secrets to Sealed Secrets,
+External Secrets, or another secure secret manager.

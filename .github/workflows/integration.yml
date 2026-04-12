@@ -4,6 +4,9 @@ on:
   push:
     branches: ["main"]
 
+env:
+  IMAGE_TAG: ${{ github.run_number }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -11,26 +14,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Build Images
-      - name: Build the Docker backend image
-        run: docker build -t jenishchauhan/food-ordering-backend:latest ./backend
-
-      - name: Build the Docker frontend image
-        run: docker build -t jenishchauhan/food-ordering-frontend:latest ./frontend
-
-      - name: Build the admin panel image
-        run: docker build -t jenishchauhan/food-ordering-admin:latest ./admin-panel
-
-      # Login once
       - name: Login to Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        run: echo "${{ secrets.docker_pass }}" | docker login -u "${{ secrets.docker_username }}" --password-stdin
 
-      # Push Images
+      - name: Build backend image
+        run: docker build -t ${{ secrets.docker_username }}/food-ordering-backend:${{ env.IMAGE_TAG }} ./backend
+
+      - name: Build frontend image
+        run: docker build -t ${{ secrets.docker_username }}/food-ordering-frontend:${{ env.IMAGE_TAG }} ./frontend
+
+      - name: Build admin-panel image
+        run: docker build -t ${{ secrets.docker_username }}/food-ordering-admin:${{ env.IMAGE_TAG }} ./admin-panel
+
       - name: Push backend image
-        run: docker push jenishchauhan/food-ordering-backend:latest
+        run: docker push ${{ secrets.docker_username }}/food-ordering-backend:${{ env.IMAGE_TAG }}
 
       - name: Push frontend image
-        run: docker push jenishchauhan/food-ordering-frontend:latest
+        run: docker push ${{ secrets.docker_username }}/food-ordering-frontend:${{ env.IMAGE_TAG }}
 
-      - name: Push admin image
-        run: docker push jenishchauhan/food-ordering-admin:latest
+      - name: Push admin-panel image
+        run: docker push ${{ secrets.docker_username }}/food-ordering-admin:${{ env.IMAGE_TAG }}

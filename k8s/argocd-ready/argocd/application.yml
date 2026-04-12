@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: food-ordering-eks
+  namespace: argocd
+  annotations:
+    # This helps explain the intent when someone opens the file later.
+    # Argo CD will watch the EKS overlay and keep the cluster in sync with Git.
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: default
+  source:
+    # Replace this with your real Git repository URL before applying.
+    repoURL: https://github.com/jenish-chauhan/Jerry-s-chaska-Online-Food-order.git
+    targetRevision: main
+    # Argo CD will render this Kustomize overlay and apply the output to EKS.
+    path: k8s/argocd-ready/overlays/eks
+  destination:
+    # Use the in-cluster API server when Argo CD is installed inside the EKS cluster.
+    server: https://kubernetes.default.svc
+    namespace: food-ordering
+  syncPolicy:
+    automated:
+      # When you push manifest changes to Git, Argo CD syncs them automatically.
+      prune: true
+      selfHeal: true
+    syncOptions:
+      # The namespace already exists in the manifests, but this keeps bootstrap smoother.
+      - CreateNamespace=true

@@ -1,0 +1,23 @@
+# For production, use remote state instead of local state.
+# Copy this file to `backend.tf`, update the values, and then run:
+# terraform init -reconfigure
+
+terraform {
+  backend "s3" {
+    # Update this to your Terraform state bucket name.
+    bucket = "replace-me-terraform-state-bucket"
+
+    # Update this path if your organization stores state under another prefix.
+    key = "food-ordering/eks/terraform.tfstate"
+
+    # Keep the backend region aligned with this deployment.
+    region = "us-east-1"
+
+    # Always encrypt the Terraform state file at rest.
+    encrypt = true
+
+    # Optional but recommended if your organization still uses DynamoDB locks.
+    # Comment this out if your Terraform backend standard is different.
+    dynamodb_table = "replace-me-terraform-locks"
+  }
+}

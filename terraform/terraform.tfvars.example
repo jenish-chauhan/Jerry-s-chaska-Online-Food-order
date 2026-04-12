@@ -1,0 +1,48 @@
+# Copy this file to `terraform.tfvars` and update the values before you apply.
+
+# Update if you want a different AWS region.
+aws_region = "us-east-1"
+
+# Update these to match your project naming standard.
+project_name = "food-ordering"
+environment  = "prod"
+cluster_name = "food-ordering-eks-prod"
+
+# Update if your organization already has an IP plan for this VPC.
+vpc_cidr = "10.30.0.0/16"
+
+# Update this to the Kubernetes version you want to run.
+cluster_version = "1.33"
+
+# IMPORTANT:
+# Replace this with your office IP, VPN range, or bastion public IP range.
+# This controls who can reach the public EKS API endpoint.
+cluster_endpoint_public_access_cidrs = [
+  "198.51.100.10/32"
+]
+
+# Optional:
+# If you want another IAM principal to be cluster admin, set the ARN here.
+# Example:
+# cluster_admin_principal_arn = "arn:aws:iam::123456789012:role/platform-admin"
+cluster_admin_principal_arn = null
+
+# Node group sizing.
+node_instance_types = ["t3.medium"]
+node_capacity_type  = "ON_DEMAND"
+node_desired_size   = 2
+node_min_size       = 2
+node_max_size       = 4
+node_disk_size      = 50
+
+# Cost/availability tradeoff:
+# false = one NAT gateway per AZ
+# true  = one shared NAT gateway
+single_nat_gateway = false
+
+cloudwatch_log_retention_days = 30
+
+tags = {
+  Owner      = "replace-me"
+  CostCenter = "platform"
+}

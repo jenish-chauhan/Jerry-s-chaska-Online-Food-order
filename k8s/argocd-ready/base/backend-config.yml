@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: food-ordering
+data:
+  PORT: "5000"
+  NODE_ENV: "development"
+
+  # IMPORTANT:
+  # FRONTEND_URL is for BACKEND CORS validation.
+  # This must contain the browser origins that open your frontend/admin panel.
+  #
+  # DO NOT use Kubernetes service names like:
+  # - http://frontend
+  # - http://admin-panel
+  #
+  # Reason:
+  # the browser origin is something like:
+  # - http://192.168.49.2:30080
+  # - http://192.168.49.2:30081
+  # - http://127.0.0.1:xxxxx   (when using `minikube service --url`)
+  #
+  # In this backend code, if you provide only scheme + host without a port,
+  # that host is allowed on ANY port.
+  #
+  # So this is a good Minikube/local practice value:
+  # - http://127.0.0.1     -> allows minikube service --url localhost ports
+  # - http://localhost     -> allows localhost ports
+  # - http://172.19.0.2    -> allows Minikube IP NodePort access
+  #
+  # If your Minikube IP changes, update the last value.
+
+  #if your using ec2 then you write the public ip of ec2
+  FRONTEND_URL: "http://127.0.0.1,http://localhost,http://172.19.0.2, http://98.93.65.23"
+
+  MONGO_DATABASE: "jerrys_chaska"
