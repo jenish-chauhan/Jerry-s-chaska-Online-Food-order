@@ -11,5 +11,59 @@ kind: Kustomization
 # - add Ingress resources
 # - add storageClassName for the PVC
 # - pin image tags for production
+# resources:
+#   - ../../base
+
+# apiVersion: kustomize.config.k8s.io/v1beta1
+# kind: Kustomization
+
 resources:
   - ../../base
+
+# Change image names and tags without touching the base manifests
+images:
+  - name: jenishchauhan/food-ordering-backend
+    # newName: jenishchauhan/food-ordering-backend
+    newTag: 1.0
+
+  - name: jenishchauhan/food-ordering-frontend
+    # newName: jenishchauhan/food-ordering-frontend
+    newTag: 1.0
+
+  - name: jenishchauhan/food-ordering-admin
+    # newName: jenishchauhan/food-ordering-admin
+    newTag: 1.0
+
+  - name: mongo
+    # newName: mongo
+    newTag: 7
+
+# Change replicas without touching the base Deployment YAMLs
+replicas:
+  - name: backend
+    count: 1
+  - name: frontend
+    count: 1
+  - name: admin-panel
+    count: 1
+  - name: mongodb
+    count: 1
+
+# Patch anything else from the overlay
+# patches:
+#   - target:
+#       kind: Service
+#       name: frontend
+#     patch: |-
+#       - op: replace
+#         path: /spec/type
+#         value: LoadBalancer
+
+#   - target:
+#       kind: ConfigMap
+#       name: web-config
+#     patch: |-
+#       - op: replace
+#         path: /data/APP_ADMIN_URL
+#         value: "http://your-domain-or-lb-url"
+
