@@ -23,14 +23,14 @@ resources:
 # Change image names and tags without touching the base manifests
 images:
   - name: jenishchauhan/food-ordering-backend
-    # newName: jenishchauhan/food-ordering-backend
+    newName: jenishchauhan/food-ordering-backend
     newTag: "1.0"
 
   - name: jenishchauhan/food-ordering-frontend
-    # newName: jenishchauhan/food-ordering-frontend
+    newName: jenishchauhan/food-ordering-frontend
     newTag: "1.0"
   - name: jenishchauhan/food-ordering-admin
-    # newName: jenishchauhan/food-ordering-admin
+    newName: jenishchauhan/food-ordering-admin
     newTag: "1.0"
 
   - name: mongo
@@ -64,4 +64,3 @@ replicas:
 #       - op: replace
 #         path: /data/APP_ADMIN_URL
 #         value: "http://your-domain-or-lb-url"
-
