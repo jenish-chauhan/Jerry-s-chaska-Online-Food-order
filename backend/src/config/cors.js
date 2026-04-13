@@ -26,35 +26,141 @@ const normalizeOrigin = (origin) => {
   }
 };
 
+const normalizeHost = (value) => value.trim().toLowerCase().replace(/\/+$/, "");
+
+const parseAllowedOriginRule = (value) => {
+  if (!value || typeof value !== "string") {
+    return null;
+  }
+
+  const trimmedValue = value.trim();
+  if (!trimmedValue) {
+    return null;
+  }
+
+  if (trimmedValue.includes("://")) {
+    try {
+      const parsedUrl = new URL(trimmedValue);
+
+      return {
+        type: "origin",
+        displayValue: parsedUrl.origin,
+        protocol: parsedUrl.protocol.toLowerCase(),
+        hostname: parsedUrl.hostname.toLowerCase(),
+        port: parsedUrl.port || "",
+        allowAnyPort: !parsedUrl.port,
+      };
+    } catch (error) {
+      return null;
+    }
+  }
+
+  const normalizedValue = normalizeHost(trimmedValue);
+
+  if (normalizedValue.startsWith("*.")) {
+    const wildcardHostname = normalizedValue.slice(2);
+
+    if (!wildcardHostname) {
+      return null;
+    }
+
+    return {
+      type: "wildcard-host",
+      displayValue: trimmedValue,
+      hostname: wildcardHostname,
+    };
+  }
+
+  return {
+    type: "host",
+    displayValue: trimmedValue,
+    hostname: normalizedValue,
+  };
+};
+
+const parseRequestOrigin = (origin) => {
+  const normalizedOrigin = normalizeOrigin(origin);
+
+  if (!normalizedOrigin) {
+    return null;
+  }
+
+  try {
+    const parsedUrl = new URL(normalizedOrigin);
+
+    return {
+      normalizedOrigin: parsedUrl.origin,
+      protocol: parsedUrl.protocol.toLowerCase(),
+      hostname: parsedUrl.hostname.toLowerCase(),
+      port: parsedUrl.port || "",
+    };
+  } catch (error) {
+    return null;
+  }
+};
+
 const formatAllowedOrigins = (allowedOrigins) =>
   allowedOrigins.length > 0 ? allowedOrigins.join(", ") : "(none configured)";
 
-const getAllowedOrigins = () =>
+const getAllowedOriginRules = () =>
   (process.env.FRONTEND_URL || "")
     .split(",")
-    .map((origin) => normalizeOrigin(origin))
+    .map((origin) => parseAllowedOriginRule(origin))
     .filter(Boolean);
 
-const isOriginAllowed = (origin, allowedOrigins = getAllowedOrigins()) => {
+const getAllowedOrigins = () =>
+  getAllowedOriginRules().map((rule) => rule.displayValue);
+
+const isOriginAllowed = (
+  origin,
+  allowedOriginRules = getAllowedOriginRules(),
+) => {
   if (!origin) {
     return true;
   }
 
-  const normalizedOrigin = normalizeOrigin(origin);
+  const parsedOrigin = parseRequestOrigin(origin);
+  if (!parsedOrigin) {
+    return false;
+  }
 
-  return allowedOrigins.some((allowedOrigin) => {
-    if (normalizedOrigin === allowedOrigin) {
-      return true;
+  return allowedOriginRules.some((rule) => {
+    if (rule.type === "origin") {
+      if (
+        parsedOrigin.protocol !== rule.protocol ||
+        parsedOrigin.hostname !== rule.hostname
+      ) {
+        return false;
+      }
+
+      if (rule.allowAnyPort) {
+        return true;
+      }
+
+      return parsedOrigin.port === rule.port;
     }
 
-    // Allow the same scheme + host when the configured value omits a port.
-    return normalizedOrigin.startsWith(`${allowedOrigin}:`);
+    if (rule.type === "host") {
+      return parsedOrigin.hostname === rule.hostname;
+    }
+
+    if (rule.type === "wildcard-host") {
+      return (
+        parsedOrigin.hostname === rule.hostname ||
+        parsedOrigin.hostname.endsWith(`.${rule.hostname}`)
+      );
+    }
+
+    return false;
   });
 };
 
 const createOriginValidator = (context) => (origin, callback) => {
-  const allowedOrigins = getAllowedOrigins();
-  const normalizedOrigin = normalizeOrigin(origin);
+  const allowedOriginRules = getAllowedOriginRules();
+  const allowedOrigins = allowedOriginRules.map((rule) => rule.displayValue);
+  const parsedOrigin = parseRequestOrigin(origin);
+  const normalizedOrigin =
+    parsedOrigin?.normalizedOrigin || normalizeOrigin(origin);
 
   console.log(`[${context}] Incoming origin: ${origin || "(none)"}`);
   console.log(
@@ -67,7 +173,7 @@ const createOriginValidator = (context) => (origin, callback) => {
     return;
   }
 
-  if (isOriginAllowed(normalizedOrigin, allowedOrigins)) {
+  if (isOriginAllowed(origin, allowedOriginRules)) {
     console.log(`[${context}] Origin allowed: ${normalizedOrigin}`);
     callback(null, true);
     return;
@@ -96,6 +202,7 @@ module.exports = {
   buildExpressCorsOptions,
   buildSocketCorsOptions,
   getAllowedOrigins,
+  getAllowedOriginRules,
   isOriginAllowed,
   normalizeOrigin,
 };

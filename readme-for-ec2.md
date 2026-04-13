@@ -26,21 +26,25 @@ Before you build and push images to Docker Hub, keep these points in mind:
 4. Do not expose backend publicly unless you really need direct API access.
    With the current design, frontend and admin-panel talk to backend through Kubernetes service discovery.
 
-5. Use strong production secrets.
+5. Set `FRONTEND_URL` in the backend ConfigMap to the real browser hostnames.
+   For EC2/KIND, prefer host-only values such as `<EC2_PUBLIC_IP>` and your EC2
+   public DNS name instead of locking CORS to one exact port.
+
+6. Use strong production secrets.
    Replace demo secrets before deployment.
 
-6. Use persistent storage for MongoDB.
+7. Use persistent storage for MongoDB.
    The Kubernetes setup now includes `k8s/mongodb-pvc.yml`.
 
-7. Open only the ports you need in the EC2 security group.
+8. Open only the ports you need in the EC2 security group.
    Recommended:
    - `22` for SSH, ideally only from your IP
    - `30080` for frontend
    - `30081` for admin-panel
-   Optional later:
+     Optional later:
    - `80` and `443` if you add an Ingress or reverse proxy
 
-8. Tag images with explicit versions.
+9. Tag images with explicit versions.
    Prefer `v1`, `v1.0.1`, or release tags instead of relying only on `latest`.
 
 ## Recommended EC2 Setup
@@ -221,11 +225,27 @@ APP_API_URL: /api
 APP_ADMIN_URL: http://<EC2_PUBLIC_IP>:30081
 ```
 
+If your browser will open the app through a different EC2 IP, DNS name, or
+HTTPS front door than the default checked into `k8s/backend-config.yml`, update
+that file too:
+
+```yaml
+FRONTEND_URL: "127.0.0.1,localhost,<EC2_PUBLIC_IP>,<EC2_PUBLIC_DNS>"
+```
+
 Then apply it again and restart the frontend deployment if needed:
 
 ```bash
 kubectl apply -f k8s/web-config.yml
 kubectl rollout restart deployment/frontend -n food-ordering
+```
+
+If you changed `FRONTEND_URL`, restart the backend so the new CORS allowlist is
+loaded into the container environment:
+
+```bash
+kubectl apply -f k8s/backend-config.yml
+kubectl rollout restart deployment/backend -n food-ordering
 ```
 
 ## 11. Verify Connectivity

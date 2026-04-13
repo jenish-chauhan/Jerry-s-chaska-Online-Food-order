@@ -154,6 +154,11 @@ When you want a new deployment through Argo CD, usually you change one of these:
 After you commit and push, Argo CD detects the Git change and syncs the cluster
 automatically because `automated` sync is enabled in `application.yml`.
 
+One operational detail matters here: syncing a changed ConfigMap does not
+retroactively replace environment variables inside an already-running pod.
+If you change `FRONTEND_URL` in the backend config or the runtime web config,
+restart the affected deployment so the new values are loaded.
+
 ## Recommended Next Step
 
 Before applying on EKS, review these files once:

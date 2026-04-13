@@ -147,14 +147,19 @@ Access to XMLHttpRequest blocked by CORS policy
 
 **Check**:
 
-1. Frontend origin is in CORS list (.env)
-2. Correct API URL (not localhost if remote)
-3. Use `http://` not `https://` (unless both are https)
+1. Frontend/admin browser host is in `FRONTEND_URL`
+2. Correct API URL (keep `/api` when using the bundled Nginx proxy)
+3. If you use a public DNS name, add that DNS host too, not only the EC2 IP
+4. Restart the backend pod after changing the ConfigMap
 
 **Quick fix**:
 
 ```bash
-# Backend logs
+# Kubernetes
+kubectl logs -n food-ordering deployment/backend | grep CORS
+kubectl rollout restart deployment/backend -n food-ordering
+
+# Docker Compose
 docker-compose logs backend | grep CORS
 ```
 

@@ -10,6 +10,12 @@ data:
   # IMPORTANT:
   # FRONTEND_URL is for BACKEND CORS validation.
   # This must contain the browser origins that open your frontend/admin panel.
+  # You can now provide either:
+  # - full origins like http://example.com or https://example.com:30081
+  # - host-only values like example.com or 98.93.65.23
+  #
+  # Host-only values are recommended for EC2/KIND because they allow that host
+  # on both NodePort services without tying CORS to a single port.
   #
   # DO NOT use Kubernetes service names like:
   # - http://frontend
@@ -31,7 +37,8 @@ data:
   #
   # If your Minikube IP changes, update the last value.
 
-  #if your using ec2 then you write the public ip of ec2
-  FRONTEND_URL: "http://127.0.0.1,http://localhost,http://172.19.0.2, http://98.93.65.23"
+  # If you are using EC2, add the public IP and public DNS host that the
+  # browser actually uses. Include both if you open the app in both ways.
+  FRONTEND_URL: "127.0.0.1,localhost,172.19.0.2,98.93.65.23"
 
   MONGO_DATABASE: "jerrys_chaska"
