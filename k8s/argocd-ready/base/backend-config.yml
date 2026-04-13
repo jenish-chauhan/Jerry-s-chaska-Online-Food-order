@@ -32,6 +32,6 @@ data:
   # If your Minikube IP changes, update the last value.
 
   #if your using ec2 then you write the public ip of ec2
-  FRONTEND_URL: "http://127.0.0.1,http://localhost,http://172.19.0.2, http://98.93.65.23"
+  FRONTEND_URL: "http://127.0.0.1,http://localhost,http://172.19.0.2, http://98.81.145.2"
 
   MONGO_DATABASE: "jerrys_chaska"
