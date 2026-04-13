@@ -1,6 +1,5 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 # This EKS overlay is the path Argo CD should watch.
 # Right now it reuses the base exactly as-is so the behavior matches your
 # current manifests.
@@ -16,23 +15,19 @@ kind: Kustomization
 
 # apiVersion: kustomize.config.k8s.io/v1beta1
 # kind: Kustomization
-
 resources:
   - ../../base
-
 # Change image names and tags without touching the base manifests
 images:
   - name: jenishchauhan/food-ordering-backend
     newName: jenishchauhan/food-ordering-backend
-    newTag: "1.0"
-
+    newTag: "16-8d342506e17a9e973cd4f10f4c4a4ffe6316b2be"
   - name: jenishchauhan/food-ordering-frontend
     newName: jenishchauhan/food-ordering-frontend
-    newTag: "1.0"
+    newTag: "16-8d342506e17a9e973cd4f10f4c4a4ffe6316b2be"
   - name: jenishchauhan/food-ordering-admin
     newName: jenishchauhan/food-ordering-admin
-    newTag: "1.0"
-
+    newTag: "16-8d342506e17a9e973cd4f10f4c4a4ffe6316b2be"
   - name: mongo
     # newName: mongo
     newTag: "7"
@@ -46,7 +41,6 @@ replicas:
     count: 1
   - name: mongodb
     count: 1
-
 # Patch anything else from the overlay
 # patches:
 #   - target:
