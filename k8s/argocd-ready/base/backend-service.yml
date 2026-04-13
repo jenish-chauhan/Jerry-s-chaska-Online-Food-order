@@ -10,4 +10,4 @@ spec:
   ports:
     - port: 5000
       targetPort: 5000
-      nodePort: 30082 # choose any free port (30000–32767)
+      # choose any free port (30000–32767)
