@@ -15,22 +15,22 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Login to Docker Hub
-        run: echo "${{ secrets.docker_pass }}" | docker login -u "${{ secrets.docker_username }}" --password-stdin
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Build backend image
-        run: docker build -t ${{ secrets.docker_username }}/food-ordering-backend:${{ env.IMAGE_TAG }} ./backend
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/food-ordering-backend:${{ env.IMAGE_TAG }} ./backend
 
       - name: Build frontend image
-        run: docker build -t ${{ secrets.docker_username }}/food-ordering-frontend:${{ env.IMAGE_TAG }} ./frontend
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/food-ordering-frontend:${{ env.IMAGE_TAG }} ./frontend
 
       - name: Build admin-panel image
-        run: docker build -t ${{ secrets.docker_username }}/food-ordering-admin:${{ env.IMAGE_TAG }} ./admin-panel
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/food-ordering-admin:${{ env.IMAGE_TAG }} ./admin-panel
 
       - name: Push backend image
-        run: docker push ${{ secrets.docker_username }}/food-ordering-backend:${{ env.IMAGE_TAG }}
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/food-ordering-backend:${{ env.IMAGE_TAG }}
 
       - name: Push frontend image
-        run: docker push ${{ secrets.docker_username }}/food-ordering-frontend:${{ env.IMAGE_TAG }}
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/food-ordering-frontend:${{ env.IMAGE_TAG }}
 
       - name: Push admin-panel image
-        run: docker push ${{ secrets.docker_username }}/food-ordering-admin:${{ env.IMAGE_TAG }}
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/food-ordering-admin:${{ env.IMAGE_TAG }}
