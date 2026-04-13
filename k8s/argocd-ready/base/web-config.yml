@@ -45,4 +45,4 @@ data:
   # use localhost + port-forward so the frontend redirect works reliably.
 
   #if you are using ec2 then you write the public ip of ec2 and port number 30081
-  APP_ADMIN_URL: "http://98.81.145.2:30081"
+  APP_ADMIN_URL: "http://184.73.136.106:30081"
