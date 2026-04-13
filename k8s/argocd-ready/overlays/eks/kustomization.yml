@@ -21,13 +21,13 @@ resources:
 images:
   - name: jenishchauhan/food-ordering-backend
     newName: jenishchauhan/food-ordering-backend
-    newTag: "16-8d342506e17a9e973cd4f10f4c4a4ffe6316b2be"
+    newTag: "17"
   - name: jenishchauhan/food-ordering-frontend
     newName: jenishchauhan/food-ordering-frontend
-    newTag: "16-8d342506e17a9e973cd4f10f4c4a4ffe6316b2be"
+    newTag: "17"
   - name: jenishchauhan/food-ordering-admin
     newName: jenishchauhan/food-ordering-admin
-    newTag: "16-8d342506e17a9e973cd4f10f4c4a4ffe6316b2be"
+    newTag: "17"
   - name: mongo
     # newName: mongo
     newTag: "7"
@@ -50,7 +50,6 @@ replicas:
 #       - op: replace
 #         path: /spec/type
 #         value: LoadBalancer
-
 #   - target:
 #       kind: ConfigMap
 #       name: web-config
