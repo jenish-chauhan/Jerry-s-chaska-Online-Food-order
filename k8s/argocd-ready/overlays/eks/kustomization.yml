@@ -24,20 +24,18 @@ resources:
 images:
   - name: jenishchauhan/food-ordering-backend
     # newName: jenishchauhan/food-ordering-backend
-    newTag: 1.0
+    newTag: "1.0"
 
   - name: jenishchauhan/food-ordering-frontend
     # newName: jenishchauhan/food-ordering-frontend
-    newTag: 1.0
-
+    newTag: "1.0"
   - name: jenishchauhan/food-ordering-admin
     # newName: jenishchauhan/food-ordering-admin
-    newTag: 1.0
+    newTag: "1.0"
 
   - name: mongo
     # newName: mongo
-    newTag: 7
-
+    newTag: "7"
 # Change replicas without touching the base Deployment YAMLs
 replicas:
   - name: backend
