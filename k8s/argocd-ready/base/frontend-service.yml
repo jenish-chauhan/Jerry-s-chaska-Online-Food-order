@@ -4,7 +4,7 @@ metadata:
   name: frontend
   namespace: food-ordering
 spec:
-  type: LoadBalancer
+  type: nodePort
   selector:
     app: frontend
   ports:
