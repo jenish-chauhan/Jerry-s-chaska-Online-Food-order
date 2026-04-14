@@ -8,6 +8,11 @@ const api = axios.create({
   },
 });
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 // Auth endpoints
 export const registerUser = async (userData) => {
   try {
@@ -94,8 +99,7 @@ export const getMenuItemsByCategory = async (categoryId) => {
 
 export const createOrder = async (orderData) => {
   try {
-    const token = localStorage.getItem("token");
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const headers = getAuthHeaders();
     const response = await api.post("/orders", orderData, { headers });
     return { success: true, data: response.data.data };
   } catch (error) {
@@ -108,8 +112,7 @@ export const createOrder = async (orderData) => {
 
 export const getUserOrders = async (userId) => {
   try {
-    const token = localStorage.getItem("token");
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const headers = getAuthHeaders();
     const response = await api.get(`/orders/user/${userId}`, { headers });
     return { success: true, data: response.data.data };
   } catch (error) {
@@ -118,10 +121,23 @@ export const getUserOrders = async (userId) => {
   }
 };
 
+export const getOrderById = async (orderNumber) => {
+  try {
+    const headers = getAuthHeaders();
+    const response = await api.get(`/orders/${orderNumber}`, { headers });
+    return { success: true, data: response.data.data };
+  } catch (error) {
+    console.error("Failed to get order", error);
+    return {
+      success: false,
+      message: error.response?.data?.error || "Failed to fetch order.",
+    };
+  }
+};
+
 export const confirmOrderPickup = async (orderNumber) => {
   try {
-    const token = localStorage.getItem("token");
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const headers = getAuthHeaders();
     const response = await api.patch(
       `/orders/${orderNumber}/confirm-pickup`,
       {},

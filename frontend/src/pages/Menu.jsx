@@ -88,18 +88,20 @@ const Menu = () => {
 
     return (
         <MainLayout>
-            <div className="bg-gradient-to-b from-primary-light/30 to-white py-12">
+            <div className="bg-gradient-to-b from-primary-light/30 to-white py-8 sm:py-12">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-10">
-                        <h1 className="text-4xl font-extrabold text-secondary mb-3">Our Menu</h1>
-                        <p className="text-lg text-gray-600">Discover our delicious selection of street food favorites</p>
+                    <div className="mb-8 text-center sm:mb-10">
+                        <h1 className="mb-3 text-3xl font-extrabold text-secondary sm:text-4xl">Our Menu</h1>
+                        <p className="mx-auto max-w-2xl text-base leading-7 text-gray-600 sm:text-lg">
+                            Discover our delicious selection of street food favorites
+                        </p>
                     </div>
 
                     {/* Categories */}
-                    <div className="flex flex-wrap justify-center gap-3 mb-12">
+                    <div className="mb-10 flex flex-wrap justify-center gap-2.5 sm:mb-12 sm:gap-3">
                         <Button
                             onClick={() => setSelectedCategory('all')}
-                            className={`rounded-full px-6 shadow-sm hover:shadow-md transition-all hover:scale-105 ${selectedCategory === 'all'
+                            className={`min-h-[44px] rounded-full px-4 text-sm shadow-sm transition-all hover:shadow-md sm:px-6 sm:text-base ${selectedCategory === 'all'
                                 ? 'text-white bg-orange-500 hover:bg-orange-600'
                                 : 'text-gray-200 bg-slate-900 hover:text-white hover:bg-slate-800 border-0'
                                 }`}
@@ -110,7 +112,7 @@ const Menu = () => {
                             <Button
                                 key={category.id}
                                 onClick={() => setSelectedCategory(category.id)}
-                                className={`rounded-full px-6 shadow-sm hover:shadow-md transition-all hover:scale-105 ${selectedCategory === category.id
+                                className={`min-h-[44px] rounded-full px-4 text-sm shadow-sm transition-all hover:shadow-md sm:px-6 sm:text-base ${selectedCategory === category.id
                                     ? 'text-white bg-orange-500 hover:bg-orange-600'
                                     : 'text-gray-200 bg-slate-900 hover:text-white hover:bg-slate-800 border-0'
                                     }`}
@@ -140,10 +142,10 @@ const Menu = () => {
                             </div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
                             {filteredItems.map((item) => (
-                                <Card key={item.id} className="overflow-hidden flex flex-col h-full hover:shadow-2xl transition-all duration-300 border-0 bg-secondary shadow-lg group hover:scale-105">
-                                    <div className="h-56 overflow-hidden relative">
+                                <Card key={item.id} className="group flex h-full flex-col overflow-hidden border-0 bg-secondary shadow-lg transition-all duration-300 hover:shadow-2xl sm:hover:scale-[1.02]">
+                                    <div className="relative h-44 overflow-hidden sm:h-52 lg:h-56">
                                         <img
                                             src={item.image}
                                             alt={item.name}
@@ -153,20 +155,20 @@ const Menu = () => {
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
                                     </div>
 
-                                    <CardHeader className="p-5 pb-3">
+                                    <CardHeader className="p-4 pb-3 sm:p-5 sm:pb-3">
                                         <div className="flex justify-between items-start gap-2">
-                                            <CardTitle className="text-xl font-semibold text-white group-hover:text-primary transition-colors">
+                                            <CardTitle className="text-lg font-semibold text-white transition-colors group-hover:text-primary sm:text-xl">
                                                 {item.name}
                                             </CardTitle>
-                                            <span className="text-2xl font-semibold text-orange-400 whitespace-nowrap">
+                                            <span className="whitespace-nowrap text-xl font-semibold text-orange-400 sm:text-2xl">
                                                 ${item.price.toFixed(2)}
                                             </span>
                                         </div>
                                     </CardHeader>
 
-                                    <CardContent className="p-5 pt-0 flex-grow">
+                                    <CardContent className="flex-grow p-4 pt-0 sm:p-5 sm:pt-0">
                                         {/* Improved text size and contrast for descriptions */}
-                                        <p className="text-base text-gray-200 line-clamp-2 leading-relaxed">
+                                        <p className="line-clamp-2 text-sm leading-6 text-gray-200 sm:text-base sm:leading-relaxed">
                                             {item.description}
                                         </p>
 
@@ -191,17 +193,17 @@ const Menu = () => {
                                         )}
                                     </CardContent>
 
-                                    <CardFooter className="p-5 pt-0 mt-auto flex gap-2">
+                                    <CardFooter className="mt-auto flex flex-col gap-2 p-4 pt-0 sm:flex-row sm:p-5 sm:pt-0">
                                         <Button
                                             onClick={() => addToCart(item)}
-                                            className="flex-1 gap-2 bg-primary hover:bg-primary-hover shadow-md hover:shadow-lg transition-all hover:scale-105 text-white font-semibold"
+                                            className="min-h-[46px] w-full flex-1 gap-2 bg-primary text-white shadow-md transition-all hover:bg-primary-hover hover:shadow-lg sm:w-auto"
                                         >
                                             <Plus className="h-5 w-5" /> Add to Cart
                                         </Button>
                                         <Button
                                             onClick={() => handleRateClick(item)}
                                             variant="outline"
-                                            className="gap-1 border-orange-400 text-orange-400 hover:bg-orange-400/10 hover:text-orange-300 shadow-sm hover:shadow-md transition-all"
+                                            className="min-h-[46px] w-full gap-1 border-orange-400 text-orange-400 shadow-sm transition-all hover:bg-orange-400/10 hover:text-orange-300 hover:shadow-md sm:w-auto"
                                         >
                                             <Star className="h-4 w-4" />
                                             {userRatings[item.id] ? 'Edit' : 'Rate'}

@@ -3,15 +3,6 @@ kind: Kustomization
 # This EKS overlay is the path Argo CD should watch.
 # Right now it reuses the base exactly as-is so the behavior matches your
 # current manifests.
-#
-# Later, if you want EKS-specific changes, add them here instead of editing
-# the base directly. Example future changes:
-# - patch Service type from NodePort to LoadBalancer
-# - add Ingress resources
-# - add storageClassName for the PVC
-# - pin image tags for production
-# resources:
-#   - ../../base
 
 # apiVersion: kustomize.config.k8s.io/v1beta1
 # kind: Kustomization

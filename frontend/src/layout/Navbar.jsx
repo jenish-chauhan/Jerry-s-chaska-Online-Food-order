@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Menu as MenuIcon, X, User, LogOut, Star, ListOrdered } from 'lucide-react';
+import { ShoppingCart, Menu as MenuIcon, X, LogOut, Star, ListOrdered } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { Button } from '../components/ui/Button';
@@ -29,56 +29,51 @@ const Navbar = () => {
     }
 
     return (
-        <nav className="border-b border-gray-200 bg-white sticky top-0 z-[100] shadow-sm">
-            <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                {/* Logo */}
-                <div className="flex items-center gap-2">
-                    <Link to="/" onClick={closeMenu} className="flex items-center gap-2 group">
-                        <div className="text-3xl transition-transform group-hover:scale-110">🍔</div>
-                        <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent transition-all">
-                            Jerry's Chaska
+        <nav className="sticky top-0 z-[100] border-b border-gray-200 bg-white shadow-sm">
+            <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-3 sm:px-6 lg:px-8">
+                <div className="flex min-w-0 items-center gap-2">
+                    <Link to="/" onClick={closeMenu} className="group flex min-w-0 items-center gap-2">
+                        <div className="text-2xl transition-transform group-hover:scale-110 sm:text-3xl">🍔</div>
+                        <span className="truncate bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-lg font-bold text-transparent transition-all sm:text-2xl">
+                            Jerry&apos;s Chaska
                         </span>
                     </Link>
                 </div>
 
-                {/* Navigation Links - Desktop */}
-                <div className="hidden md:flex items-center gap-6">
+                <div className="hidden items-center gap-6 md:flex">
                     {navLinks.map((link) => (
                         <Link
                             key={link.path}
                             to={link.path}
-                            className="text-sm font-medium text-secondary hover:text-primary transition-colors relative group flex items-center gap-1"
+                            className="group relative flex items-center gap-1 text-sm font-medium text-secondary transition-colors hover:text-primary"
                         >
                             {link.icon}
                             {link.name}
-                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+                            <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-primary transition-all group-hover:w-full"></span>
                         </Link>
                     ))}
                 </div>
 
-                {/* Right Side Actions */}
-                <div className="flex items-center gap-2 sm:gap-3">
-                    {/* Cart Button */}
+                <div className="flex items-center gap-1.5 sm:gap-3">
                     <Link to="/cart">
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="relative hover:bg-primary-light transition-all hover:scale-110"
+                            className="relative h-9 w-9 transition-all hover:bg-primary-light sm:h-10 sm:w-10 sm:hover:scale-110"
                         >
                             <ShoppingCart className="h-5 w-5 text-secondary" />
                             {getCartCount() > 0 && (
-                                <Badge className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full p-0 bg-primary text-white text-xs font-bold">
+                                <Badge className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary p-0 text-xs font-bold text-white">
                                     {getCartCount()}
                                 </Badge>
                             )}
                         </Button>
                     </Link>
 
-                    {/* User Actions - Desktop */}
-                    <div className="hidden md:flex items-center gap-2">
+                    <div className="hidden items-center gap-2 md:flex">
                         {user ? (
                             <>
-                                <span className="text-sm font-medium text-secondary">
+                                <span className="max-w-[160px] truncate text-sm font-medium text-secondary">
                                     Hi, {user.name}
                                 </span>
                                 <Button
@@ -86,28 +81,27 @@ const Navbar = () => {
                                     size="icon"
                                     onClick={logout}
                                     title="Logout"
-                                    className="hover:bg-red-50 hover:text-red-600 transition-all hover:scale-110"
+                                    className="transition-all hover:bg-red-50 hover:text-red-600 hover:scale-110"
                                 >
                                     <LogOut className="h-5 w-5" />
                                 </Button>
                             </>
                         ) : (
                             <Link to="/login">
-                                <Button className="bg-primary hover:bg-primary-hover transition-all hover:scale-105 shadow-sm hover:shadow-md">
+                                <Button className="bg-primary shadow-sm transition-all hover:bg-primary-hover hover:scale-105 hover:shadow-md">
                                     Login
                                 </Button>
                             </Link>
                         )}
                     </div>
 
-                    {/* Mobile Menu Toggle Button */}
                     <div className="md:hidden">
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={toggleMenu}
                             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-                            className="hover:bg-primary-light transition-colors"
+                            className="h-9 w-9 transition-colors hover:bg-primary-light sm:h-10 sm:w-10"
                         >
                             {isMenuOpen ? <X className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
                         </Button>
@@ -115,36 +109,35 @@ const Navbar = () => {
                 </div>
             </div>
 
-            {/* Mobile Navigation Menu */}
             {isMenuOpen && (
-                <div className="md:hidden border-t border-gray-100 bg-white py-4 px-4 shadow-lg animate-in slide-in-from-top duration-200">
+                <div className="animate-in slide-in-from-top border-t border-gray-100 bg-white px-4 py-4 shadow-lg duration-200 md:hidden">
                     <div className="flex flex-col gap-4">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.path}
                                 to={link.path}
                                 onClick={closeMenu}
-                                className="text-lg font-semibold text-secondary hover:text-primary py-2 border-b border-gray-50 flex items-center gap-2"
+                                className="flex items-center gap-2 border-b border-gray-50 py-2 text-lg font-semibold text-secondary hover:text-primary"
                             >
                                 {link.icon}
                                 {link.name}
                             </Link>
                         ))}
 
-                        <div className="pt-2 flex flex-col gap-3">
+                        <div className="flex flex-col gap-3 pt-2">
                             {user ? (
                                 <>
-                                    <div className="flex items-center gap-2 px-2 py-2 bg-primary-light rounded-lg">
-                                        <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center font-bold">
+                                    <div className="flex items-center gap-2 rounded-lg bg-primary-light px-2 py-2">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-white">
                                             {user.name.charAt(0)}
                                         </div>
-                                        <span className="text-sm font-bold text-secondary">
+                                        <span className="truncate text-sm font-bold text-secondary">
                                             Hi, {user.name}
                                         </span>
                                     </div>
                                     <Button
                                         variant="outline"
-                                        className="w-full justify-start gap-2 text-red-600 hover:bg-red-50 border-red-200"
+                                        className="w-full justify-start gap-2 border-red-200 text-red-600 hover:bg-red-50"
                                         onClick={() => {
                                             logout();
                                             closeMenu();
@@ -156,7 +149,7 @@ const Navbar = () => {
                                 </>
                             ) : (
                                 <Link to="/login" onClick={closeMenu}>
-                                    <Button className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3">
+                                    <Button className="w-full bg-primary py-3 font-bold text-white hover:bg-primary-hover">
                                         Login / Sign Up
                                     </Button>
                                 </Link>

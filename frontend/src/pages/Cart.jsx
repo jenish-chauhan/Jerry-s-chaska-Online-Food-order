@@ -76,8 +76,11 @@ const Cart = () => {
                 throw new Error(response.message || 'Failed to place order.');
             }
             clearCart();
-            // Pass order details to success page
-            navigate('/order-success', { state: { orderDetails: response.data } });
+            const orderNumber = response.data?.orderNumber;
+            const successUrl = orderNumber
+              ? `/order-success?order=${encodeURIComponent(orderNumber)}`
+              : "/order-success";
+            navigate(successUrl, { state: { orderDetails: response.data } });
         } catch (error) {
             console.error("Order failed:", error);
             // Optionally set an error state to show a message to the user
@@ -109,17 +112,17 @@ const Cart = () => {
                     <div className="lg:col-span-7">
                         <div className="space-y-4 mb-8">
                             {cart.map((item) => (
-                                <Card key={item.id} className="flex flex-row items-center p-4 bg-secondary border-0 shadow-md">
+                                <Card key={item.id} className="flex flex-col gap-4 p-4 bg-secondary border-0 shadow-md sm:flex-row sm:items-center">
                                     <img
                                         src={item.image}
                                         alt={item.name}
                                         className="h-24 w-24 rounded-md object-cover hidden sm:block"
                                     />
-                                    <div className="ml-4 flex-1">
+                                    <div className="flex-1 sm:ml-4">
                                         <h3 className="text-lg font-semibold text-white">{item.name}</h3>
                                         <p className="text-orange-400 font-semibold text-sm">${item.price.toFixed(2)}</p>
                                     </div>
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-2 self-start sm:self-center">
                                         <Button
                                             variant="outline"
                                             size="icon"
@@ -141,7 +144,7 @@ const Cart = () => {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="ml-4 text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                                        className="self-end text-red-400 hover:text-red-300 hover:bg-red-400/10 sm:ml-4 sm:self-center"
                                         onClick={() => removeFromCart(item.id)}
                                     >
                                         <Trash2 className="h-5 w-5" />
@@ -161,7 +164,7 @@ const Cart = () => {
                                         <input type="text" name="customerName" value={formData.customerName} onChange={handleInputChange} className="w-full bg-gray-800 border border-gray-700 rounded-md p-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500" placeholder="John Doe" />
                                         {errors.customerName && <p className="text-red-400 text-xs mt-1">{errors.customerName}</p>}
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                         <div>
                                             <label className="block text-sm font-medium mb-1">Phone</label>
                                             <input type="text" name="phone" value={formData.phone} onChange={handleInputChange} className="w-full bg-gray-800 border border-gray-700 rounded-md p-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500" placeholder="10-digit number" />

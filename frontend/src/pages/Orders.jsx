@@ -1,12 +1,10 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { confirmOrderPickup, getUserOrders } from "../services/api";
 import MainLayout from "../layout/MainLayout";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from "../components/ui/Card";
 import {
   Package,
@@ -69,6 +67,33 @@ const statusConfig = {
 
 const timelineStages = ["pending", "accepted", "preparing", "ready"];
 
+const sortOrdersByCreatedAt = (orderList) =>
+  [...orderList].sort(
+    (left, right) =>
+      new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
+  );
+
+const upsertOrder = (orderList, incomingOrder) => {
+  const exists = orderList.some(
+    (order) => order.orderNumber === incomingOrder.orderNumber,
+  );
+
+  const nextOrders = exists
+    ? orderList.map((order) =>
+        order.orderNumber === incomingOrder.orderNumber ? incomingOrder : order,
+      )
+    : [incomingOrder, ...orderList];
+
+  return sortOrdersByCreatedAt(nextOrders);
+};
+
+const getLatestReadyOrder = (orderList, dismissedOrderNumbers) =>
+  orderList.find(
+    (order) =>
+      order.orderStatus === "ready" &&
+      !dismissedOrderNumbers.includes(order.orderNumber),
+  ) || null;
+
 const Orders = () => {
   const { user } = useAuth();
   const [orders, setOrders] = useState([]);
@@ -76,23 +101,52 @@ const Orders = () => {
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [readyPopup, setReadyPopup] = useState(null);
   const [confirmingOrder, setConfirmingOrder] = useState(null);
+  const [dismissedReadyOrders, setDismissedReadyOrders] = useState([]);
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      if (user?.id) {
+  const fetchOrders = useCallback(
+    async (showLoader = true) => {
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
+
+      if (showLoader) {
+        setLoading(true);
+      }
+
+      try {
         const res = await getUserOrders(user.id);
         if (res.success) {
-          setOrders(res.data);
-          const latestReadyOrder = res.data.find(
-            (order) => order.orderStatus === "ready",
-          );
-          setReadyPopup(latestReadyOrder || null);
+          setOrders(sortOrdersByCreatedAt(res.data));
+        }
+      } finally {
+        if (showLoader) {
+          setLoading(false);
         }
       }
-      setLoading(false);
-    };
+    },
+    [user?.id],
+  );
+
+  useEffect(() => {
     fetchOrders();
-  }, [user]);
+  }, [fetchOrders]);
+
+  useEffect(() => {
+    if (!user?.id) {
+      return undefined;
+    }
+
+    const intervalId = window.setInterval(() => {
+      fetchOrders(false);
+    }, 15000);
+
+    return () => window.clearInterval(intervalId);
+  }, [fetchOrders, user?.id]);
+
+  useEffect(() => {
+    setReadyPopup(getLatestReadyOrder(orders, dismissedReadyOrders));
+  }, [orders, dismissedReadyOrders]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -106,12 +160,7 @@ const Orders = () => {
         return;
       }
 
-      setOrders((current) => {
-        const exists = current.some(
-          (existing) => existing.orderNumber === order.orderNumber,
-        );
-        return exists ? current : [order, ...current];
-      });
+      setOrders((current) => upsertOrder(current, order));
     };
 
     const handleOrderUpdated = (order) => {
@@ -119,19 +168,11 @@ const Orders = () => {
         return;
       }
 
-      setOrders((current) =>
-        current.map((existing) =>
-          existing.orderNumber === order.orderNumber ? order : existing,
-        ),
-      );
+      setOrders((current) => upsertOrder(current, order));
 
-      if (order.orderStatus === "ready") {
-        setReadyPopup(order);
-      }
-
-      if (order.orderStatus === "completed") {
-        setReadyPopup((current) =>
-          current?.orderNumber === order.orderNumber ? null : current,
+      if (order.orderStatus !== "ready") {
+        setDismissedReadyOrders((current) =>
+          current.filter((item) => item !== order.orderNumber),
         );
       }
     };
@@ -158,10 +199,9 @@ const Orders = () => {
         throw new Error(result.message);
       }
 
-      setOrders((current) =>
-        current.map((order) =>
-          order.orderNumber === orderNumber ? result.data : order,
-        ),
+      setOrders((current) => upsertOrder(current, result.data));
+      setDismissedReadyOrders((current) =>
+        current.filter((item) => item !== orderNumber),
       );
       setReadyPopup(null);
     } catch (error) {
@@ -195,22 +235,36 @@ const Orders = () => {
   return (
     <MainLayout>
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-10">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">My Orders</h1>
+        <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
+              My Orders
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
+              Live updates arrive automatically while your order moves through
+              the kitchen.
+            </p>
+          </div>
+          <div className="inline-flex w-fit items-center gap-2 self-start rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-orange-700 sm:self-auto sm:text-xs">
+            <span className="h-2 w-2 rounded-full bg-orange-500" />
+            Auto Sync On
+          </div>
+        </div>
 
         {readyPopup && (
-          <div className="mb-8 p-4 bg-green-500/20 border border-green-500 rounded-lg flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-bold text-green-700 dark:text-green-400">
+          <div className="mb-8 flex flex-col gap-4 rounded-xl border border-green-300 bg-green-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <h3 className="text-base font-bold text-green-800 sm:text-lg">
                 Your order is ready!
               </h3>
-              <p className="text-gray-700 dark:text-gray-300">
-                Please collect Order #{readyPopup.orderNumber} from the counter.
+              <p className="mt-1 text-sm leading-6 text-green-900 sm:text-base">
+                Please collect <span className="font-semibold">Order #{readyPopup.orderNumber}</span> from the counter.
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
               <Button
                 onClick={() => handleConfirmPickup(readyPopup.orderNumber)}
-                className="bg-green-600 hover:bg-green-700 text-white"
+                className="min-h-[44px] w-full bg-green-600 px-4 text-sm text-white hover:bg-green-700 sm:w-auto sm:text-base"
                 disabled={confirmingOrder === readyPopup.orderNumber}
               >
                 {confirmingOrder === readyPopup.orderNumber
@@ -218,9 +272,16 @@ const Orders = () => {
                   : "I Collected My Order"}
               </Button>
               <Button
-                onClick={() => setReadyPopup(null)}
+                onClick={() => {
+                  setDismissedReadyOrders((current) =>
+                    current.includes(readyPopup.orderNumber)
+                      ? current
+                      : [...current, readyPopup.orderNumber],
+                  );
+                  setReadyPopup(null);
+                }}
                 variant="outline"
-                className="border-green-500 text-green-600"
+                className="min-h-[44px] w-full border-green-600 text-green-700 hover:bg-green-100 sm:w-auto"
               >
                 Later
               </Button>
@@ -263,14 +324,14 @@ const Orders = () => {
                   className="bg-secondary border-0 shadow-lg text-white overflow-hidden"
                 >
                   <div
-                    className="p-5 cursor-pointer flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:bg-white/5 transition-colors"
+                    className="flex cursor-pointer flex-col gap-4 p-4 transition-colors hover:bg-white/5 sm:flex-row sm:items-center sm:justify-between sm:p-5"
                     onClick={() => toggleExpand(order.orderNumber)}
                   >
-                    <div className="flex items-center gap-4">
-                      <div className={`p-3 rounded-full ${status.bg}`}>
+                    <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+                      <div className={`rounded-full p-3 ${status.bg}`}>
                         <StatusIcon className={`h-6 w-6 ${status.color}`} />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm text-gray-400 mb-1">
                           Order{" "}
                           <span className="text-white font-semibold">
@@ -289,7 +350,7 @@ const Orders = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
+                    <div className="flex w-full items-center justify-between gap-4 sm:w-auto sm:justify-end sm:gap-6">
                       <div className="text-left sm:text-right">
                         <p className={`text-sm font-semibold ${status.color}`}>
                           {status.label}
@@ -309,7 +370,7 @@ const Orders = () => {
                   </div>
 
                   {isExpanded && (
-                    <div className="border-t border-gray-700 bg-gray-900/50 p-5">
+                    <div className="border-t border-gray-700 bg-gray-900/50 p-4 sm:p-5">
                       {/* Status Timeline UI */}
                       {order.orderStatus !== "cancelled" &&
                         order.orderStatus !== "completed" && (
@@ -317,7 +378,7 @@ const Orders = () => {
                             <h4 className="text-sm font-semibold text-gray-300 mb-4 uppercase tracking-wider">
                               Live Tracking
                             </h4>
-                            <div className="flex justify-between items-center relative mb-2">
+                            <div className="relative mb-2 flex items-center justify-between gap-1.5 sm:gap-2">
                               {/* Line connecting milestones */}
                               <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-700 -z-10 -translate-y-1/2 rounded"></div>
                               <div
@@ -335,7 +396,7 @@ const Orders = () => {
                                 return (
                                   <div
                                     key={stage}
-                                    className="flex flex-col items-center"
+                                    className="flex min-w-0 flex-1 flex-col items-center px-1"
                                   >
                                     <div
                                       className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${isCompleted ? "bg-orange-500 border-orange-500 text-white" : "bg-gray-800 border-gray-600 text-gray-500"}`}
@@ -347,7 +408,7 @@ const Orders = () => {
                                       )}
                                     </div>
                                     <span
-                                      className={`text-xs mt-2 font-medium ${isCompleted ? "text-white" : "text-gray-500"}`}
+                                      className={`mt-2 text-[10px] font-medium leading-tight text-center sm:text-xs ${isCompleted ? "text-white" : "text-gray-500"}`}
                                     >
                                       {stageConfig.label}
                                     </span>
@@ -357,8 +418,8 @@ const Orders = () => {
                             </div>
 
                             {order.orderStatus === "ready" && (
-                              <div className="mt-4 p-3 bg-green-500/20 border border-green-500/50 rounded text-center">
-                                <p className="text-green-400 font-medium">
+                              <div className="mt-4 rounded border border-green-500/50 bg-green-500/20 p-3 text-center">
+                                <p className="font-medium text-green-300">
                                   Your order is ready. Please collect it from
                                   the counter.
                                 </p>
@@ -366,7 +427,7 @@ const Orders = () => {
                                   onClick={() =>
                                     handleConfirmPickup(order.orderNumber)
                                   }
-                                  className="mt-3 bg-green-600 hover:bg-green-700 text-white"
+                                  className="mt-3 w-full bg-green-600 text-white hover:bg-green-700 sm:w-auto"
                                   disabled={confirmingOrder === order.orderNumber}
                                 >
                                   {confirmingOrder === order.orderNumber
@@ -385,7 +446,7 @@ const Orders = () => {
                         {order.items.map((item, index) => (
                           <div
                             key={index}
-                            className="flex justify-between items-center text-sm"
+                            className="flex items-start justify-between gap-4 text-sm"
                           >
                             <div className="flex items-center gap-3">
                               <span className="w-6 h-6 rounded flex items-center justify-center bg-gray-800 text-xs font-bold text-orange-400 border border-gray-700">
@@ -395,7 +456,7 @@ const Orders = () => {
                                 {item.productName}
                               </span>
                             </div>
-                            <span className="text-gray-400">
+                            <span className="whitespace-nowrap text-gray-400">
                               ${(item.price * item.quantity).toFixed(2)}
                             </span>
                           </div>
