@@ -21,6 +21,7 @@ Save and exit (CTRL + X → Y → Enter)
 🚀 Create the cluster
 kind create cluster --name my-cluster --config kind-cluster.yaml
 
+first you have to create argocd namespace
 ==== install argo with kustomization
 
 apiVersion: kustomize.config.k8s.io/v1beta1
