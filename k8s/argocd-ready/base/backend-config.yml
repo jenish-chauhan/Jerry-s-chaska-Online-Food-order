@@ -39,6 +39,6 @@ data:
 
   # If you are using EC2, add the public IP and public DNS host that the
   # browser actually uses. Include both if you open the app in both ways.
-  FRONTEND_URL: "http://127.0.0.1 , http://100.53.15.81"
+  FRONTEND_URL: "http://127.0.0.1 , http://54.235.57.113"
 
   MONGO_DATABASE: "jerrys_chaska"
