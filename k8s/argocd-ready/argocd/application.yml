@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: food-ordering-eks
+  name: food-ordering-application
   namespace: argocd
   annotations:
     # This helps explain the intent when someone opens the file later.
