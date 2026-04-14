@@ -38,6 +38,7 @@ README-FOR-DOCKER.MD
 # ---------- Package lock (optional — uncomment if you prefer) ----------
 # package-lock.json
 
+*.md
 CHANGES.md 
 COMPLETE-APPLICATION-GUIDE.md 
 COMPLETE.md 
