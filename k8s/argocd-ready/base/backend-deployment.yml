@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: jenishchauhan/food-ordering-backend:latest
+          image: jenishchauhan/food-ordering-backend:11
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
