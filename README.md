@@ -1,10 +1,10 @@
-# Jerry's Chaska - Cloud-Native Food Ordering System# 🍔 Jerry's Chaska - Food Ordering System# Jerry's Chaska
+# Jerry's Chaska - Cloud-Native Food Ordering System# 🍔
 
-**A production-grade microservices-based food ordering platform with GitOps CI/CD automation\*\***A Production-Ready, DevOps-Enabled Food Ordering Platform\*\*Full-stack food ordering system with:
+**A production-grade microservices-based food ordering platform with GitOps CI/CD automation**
 
 ## 📌 Project Overview
 
-**Jerry's Chaska** is a cloud-native microservices-based food ordering system designed for scalability, reliability, and automated deployment. It demonstrates enterprise-grade DevOps practices including:---- Frontend: React + Vite + Nginx
+**Jerry's Chaska** is a cloud-native microservices-based food ordering system designed for scalability, reliability, and automated deployment. It demonstrates enterprise-grade DevOps practices
 
 - **Microservices Architecture**: Independently deployable, loosely coupled services- Admin Panel: React + Vite + Nginx
 
