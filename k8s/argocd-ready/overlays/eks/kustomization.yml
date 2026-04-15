@@ -12,13 +12,13 @@ resources:
 images:
   - name: jenishchauhan/food-ordering-backend
     newName: jenishchauhan/food-ordering-backend
-    newTag: "23"
+    newTag: "26"
   - name: jenishchauhan/food-ordering-frontend
     newName: jenishchauhan/food-ordering-frontend
-    newTag: "23"
+    newTag: "26"
   - name: jenishchauhan/food-ordering-admin
     newName: jenishchauhan/food-ordering-admin
-    newTag: "23"
+    newTag: "26"
   - name: mongo
     # newName: mongo
     newTag: "7"
