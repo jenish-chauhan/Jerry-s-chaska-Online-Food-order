@@ -2,23 +2,7 @@
 
 **A production-grade microservices-based food ordering platform with GitOps CI/CD automation\*\***A Production-Ready, DevOps-Enabled Food Ordering Platform\*\*Full-stack food ordering system with:
 
-![Docker](https://img.shields.io/badge/Docker-20.10+-blue?logo=docker)[![Node.js](https://img.shields.io/badge/Node.js-20+-green)](https://nodejs.org/)- `frontend` customer app
-
-![Kubernetes](https://img.shields.io/badge/Kubernetes-1.24+-blue?logo=kubernetes)
-
-![GitHub Actions](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?logo=github-actions)[![React](https://img.shields.io/badge/React-18+-blue)](https://react.dev/)- `admin-panel` admin dashboard
-
-![ArgoCD](https://img.shields.io/badge/CD-ArgoCD-FF6B6B?logo=argo)
-
-![MongoDB](https://img.shields.io/badge/Database-MongoDB-47A248?logo=mongodb)[![MongoDB](https://img.shields.io/badge/MongoDB-7-green)](https://www.mongodb.com/)- `backend` Node.js API
-
-![Node.js](https://img.shields.io/badge/Backend-Node.js%2020-339933?logo=node.js)
-
-![React](https://img.shields.io/badge/Frontend-React%2018-61DAFB?logo=react)[![Docker](https://img.shields.io/badge/Docker-Compose-blue)](https://www.docker.com/)- `mongodb` as the active database
-
----[![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-blue)](https://kubernetes.io/)
-
-## 📌 Project Overview[![Jenkins](https://img.shields.io/badge/CI%2FCD-Jenkins-red)](https://www.jenkins.io/)## Stack
+## 📌 Project Overview
 
 **Jerry's Chaska** is a cloud-native microservices-based food ordering system designed for scalability, reliability, and automated deployment. It demonstrates enterprise-grade DevOps practices including:---- Frontend: React + Vite + Nginx
 
@@ -36,7 +20,7 @@
 
 - **High Availability**: Multi-replica deployments, health checks, and graceful shutdown1. [Overview](#overview)- Deployment: Docker, Docker Compose, Kubernetes
 
-### Key Highlights2. [Architecture](#architecture)
+### Key Highlights. [Architecture](#architecture)
 
 ✅ **Production-Ready**: Security best practices, resource limits, health checks 3. [Features](#features)## Run With Docker
 
