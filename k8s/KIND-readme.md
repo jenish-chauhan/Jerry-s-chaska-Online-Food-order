@@ -37,3 +37,6 @@ kubectl apply -k . --server-side
 == get argocd password
 kubectl -n argocd get secret argocd-initial-admin-secret \
  -o jsonpath="{.data.password}" | base64 -d; echo
+
+== port forward argocd server
+kubectl port-forward svc/argocd-server -n argocd 8080:443

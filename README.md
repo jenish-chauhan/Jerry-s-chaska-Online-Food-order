@@ -1,798 +1,1568 @@
-# 🍔 Jerry's Chaska - Food Ordering System# Jerry's Chaska
+# Jerry's Chaska - Cloud-Native Food Ordering System# 🍔 Jerry's Chaska - Food Ordering System# Jerry's Chaska
 
-**A Production-Ready, DevOps-Enabled Food Ordering Platform**Full-stack food ordering system with:
+**A production-grade microservices-based food ordering platform with GitOps CI/CD automation\*\***A Production-Ready, DevOps-Enabled Food Ordering Platform\*\*Full-stack food ordering system with:
 
-[![Node.js](https://img.shields.io/badge/Node.js-20+-green)](https://nodejs.org/)- `frontend` customer app
+![Docker](https://img.shields.io/badge/Docker-20.10+-blue?logo=docker)[![Node.js](https://img.shields.io/badge/Node.js-20+-green)](https://nodejs.org/)- `frontend` customer app
 
-[![React](https://img.shields.io/badge/React-18+-blue)](https://react.dev/)- `admin-panel` admin dashboard
+![Kubernetes](https://img.shields.io/badge/Kubernetes-1.24+-blue?logo=kubernetes)
 
-[![MongoDB](https://img.shields.io/badge/MongoDB-7-green)](https://www.mongodb.com/)- `backend` Node.js API
+![GitHub Actions](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?logo=github-actions)[![React](https://img.shields.io/badge/React-18+-blue)](https://react.dev/)- `admin-panel` admin dashboard
 
-[![Docker](https://img.shields.io/badge/Docker-Compose-blue)](https://www.docker.com/)- `mongodb` as the active database
+![ArgoCD](https://img.shields.io/badge/CD-ArgoCD-FF6B6B?logo=argo)
 
-[![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-blue)](https://kubernetes.io/)
+![MongoDB](https://img.shields.io/badge/Database-MongoDB-47A248?logo=mongodb)[![MongoDB](https://img.shields.io/badge/MongoDB-7-green)](https://www.mongodb.com/)- `backend` Node.js API
 
-[![Jenkins](https://img.shields.io/badge/CI%2FCD-Jenkins-red)](https://www.jenkins.io/)## Stack
+![Node.js](https://img.shields.io/badge/Backend-Node.js%2020-339933?logo=node.js)
 
----- Frontend: React + Vite + Nginx
+![React](https://img.shields.io/badge/Frontend-React%2018-61DAFB?logo=react)[![Docker](https://img.shields.io/badge/Docker-Compose-blue)](https://www.docker.com/)- `mongodb` as the active database
 
-- Admin Panel: React + Vite + Nginx
+---[![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-blue)](https://kubernetes.io/)
 
-## 📋 Table of Contents- Backend: Node.js + Express + Mongoose
+## 📌 Project Overview[![Jenkins](https://img.shields.io/badge/CI%2FCD-Jenkins-red)](https://www.jenkins.io/)## Stack
 
-- Database: MongoDB 7
+**Jerry's Chaska** is a cloud-native microservices-based food ordering system designed for scalability, reliability, and automated deployment. It demonstrates enterprise-grade DevOps practices including:---- Frontend: React + Vite + Nginx
 
-1. [Overview](#overview)- Deployment: Docker, Docker Compose, Kubernetes
+- **Microservices Architecture**: Independently deployable, loosely coupled services- Admin Panel: React + Vite + Nginx
 
-2. [Architecture](#architecture)
+- **Container Orchestration**: Kubernetes-based deployment with auto-scaling and self-healing
 
-3. [Features](#features)## Run With Docker
+- **GitOps Workflow**: ArgoCD-driven, declarative infrastructure management## 📋 Table of Contents- Backend: Node.js + Express + Mongoose
 
-4. [Tech Stack](#tech-stack)
+- **Continuous Integration**: GitHub Actions for automated builds, tests, and Docker image pushes
 
-5. [Quick Start](#quick-start)From the project root:
+- **Continuous Deployment**: Fully automated deployment pipeline with ArgoCD- Database: MongoDB 7
 
-6. [DevOps & Deployment](#devops--deployment)
+- **Configuration Management**: Kustomize overlays for environment-specific deployments (dev/staging/prod)
 
-7. [API Documentation](#api-documentation)```bash
+- **High Availability**: Multi-replica deployments, health checks, and graceful shutdown1. [Overview](#overview)- Deployment: Docker, Docker Compose, Kubernetes
 
-8. [Project Structure](#project-structure)docker compose up --build -d
+### Key Highlights2. [Architecture](#architecture)
 
-9. [Contributing](#contributing)```
+✅ **Production-Ready**: Security best practices, resource limits, health checks 3. [Features](#features)## Run With Docker
 
-10. [License](#license)
+✅ **Scalable**: Horizontal pod autoscaling and load balancing
 
-App URLs:
+✅ **Reliable**: Self-healing capabilities, automated rollbacks, monitoring readiness 4. [Tech Stack](#tech-stack)
+
+✅ **Secure**: Non-root containers, secret management, network policies
+
+✅ **Observable**: Structured logging, health endpoints, deployment tracking 5. [Quick Start](#quick-start)From the project root:
+
+---6. [DevOps & Deployment](#devops--deployment)
+
+## 🏗️ Architecture Overview7. [API Documentation](#api-documentation)```bash
+
+### Microservices Architecture8. [Project Structure](#project-structure)docker compose up --build -d
+
+This project follows a **microservices pattern** where each service is:9. [Contributing](#contributing)```
+
+- **Independently deployable**: Changes in one service don't require full system redeployment10. [License](#license)
+
+- **Loosely coupled**: Services communicate via REST APIs and shared databases
+
+- **Technology-agnostic**: Each service can use different tech stacksApp URLs:
+
+- **Fault-isolated**: Failure in one service doesn't cascade across the system
 
 ---
+
+### System Components
 
 - Frontend: `http://localhost:5173`
 
-## 🎯 Overview- Admin Panel: `http://localhost:8080`
+````
 
-- Backend API: `http://localhost:5000/api`
+┌─────────────────────────────────────────────────────────────────┐## 🎯 Overview- Admin Panel: `http://localhost:8080`
 
-**Jerry's Chaska** is a full-stack food ordering system designed with enterprise-grade DevOps practices and modern deployment strategies. The application demonstrates:
+│                      End Users (Browser)                        │
 
-## Main Folders
+├──────────────────────────────────────────────────────────────────┤- Backend API: `http://localhost:5000/api`
 
-- **Containerization**: Fully Dockerized microservices architecture
+│
 
-- **Orchestration**: Kubernetes-ready with Helm-compatible deployments```text
+├─► Customer Frontend        ├─► Admin Dashboard**Jerry's Chaska** is a full-stack food ordering system designed with enterprise-grade DevOps practices and modern deployment strategies. The application demonstrates:
 
-- **CI/CD Pipeline**: Automated build, test, and deploy via Jenkinsproject-root/
+│   (React 18 + Vite)       │   (React 18 + Vite)
 
-- **Production Standards**: Health checks, graceful shutdowns, security best practices|-- frontend/
+│   Port: 5173              │   Port: 5174/8080## Main Folders
 
-- **Scalability**: Microservices design for independent scaling|-- admin-panel/
+│                           │
 
-|-- backend/
+└─────────────┬─────────────┘- **Containerization**: Fully Dockerized microservices architecture
 
-### Key Capabilities|-- k8s/
+              │ HTTP/REST
 
-|-- docker-compose.yml
+    ┌─────────▼─────────────────────────────┐- **Orchestration**: Kubernetes-ready with Helm-compatible deployments```text
 
-| Feature | Status | Details ||-- docker-command-readme.md
+    │   Backend API (Node.js + Express)     │
 
-|---------|--------|---------|`-- README.md
+    │   Port: 5000                          │- **CI/CD Pipeline**: Automated build, test, and deploy via Jenkinsproject-root/
 
-| User Authentication | ✅ Live | JWT-based with bcrypt hashing |```
+    │   ✓ Auth Routes                       │
 
-| Order Management | ✅ Live | Create, track, and confirm orders |
+    │   ✓ Menu Management                   │- **Production Standards**: Health checks, graceful shutdowns, security best practices|-- frontend/
 
-| Menu Management | ✅ Live | Admin CRUD operations |## Documentation
+    │   ✓ Order Processing                  │
 
-| Analytics Dashboard | ✅ Live | Real-time order insights |
+    │   ✓ Analytics & Reporting             │- **Scalability**: Microservices design for independent scaling|-- admin-panel/
 
-| Multi-User Admin Panel | ✅ Live | Role-based access control |- `docker-command-readme.md` - Docker build/run commands
+    │   ✓ Admin Operations                  │
 
-| Docker Deployment | ✅ Live | Single-command deployment |- `k8s/README.md` - Kubernetes setup commands
+    └─────────────┬─────────────────────────┘|-- backend/
 
-| Kubernetes Ready | ✅ Live | Complete K8s manifests provided |- `SETUP.md` - project setup notes
+                  │ MongoDB Protocol
 
-| CI/CD Automation | ✅ Live | Jenkins pipeline with auto-deploy |- `MIGRATION.md` - migration background
+        ┌─────────▼────────────┐### Key Capabilities|-- k8s/
 
-- `TROUBLESHOOTING.md` - common fixes
+        │  MongoDB Database    │
 
----
+        │  Port: 27017         │|-- docker-compose.yml
 
-## Note
+        │  ✓ Users             │
 
-## 🏗️ Architecture
+        │  ✓ Food Items        │| Feature | Status | Details ||-- docker-command-readme.md
 
-Legacy MySQL-only files were removed because the current application uses MongoDB end to end.
+        │  ✓ Orders            │
 
-### System Architecture
+        │  ✓ Admin Sessions    │|---------|--------|---------|`-- README.md
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    User Layer                               │
-│  ┌──────────────────┐         ┌──────────────────┐          │
-│  │ Customer App     │         │ Admin Dashboard  │          │
-│  │ (React 18)       │         │ (React 18)       │          │
-│  │ Port 5173        │         │ Port 5174/8080   │          │
-│  └────────┬─────────┘         └────────┬─────────┘          │
-└───────────┼─────────────────────────────┼──────────────────┘
-            │                            │
-    ┌───────┴────────────────────────────┴────────┐
-    │    HTTP/REST API Layer (CORS-Enabled)       │
-    │                                              │
-    │  ┌──────────────────────────────────────┐   │
-    │  │  Backend API (Node.js/Express)       │   │
-    │  │  Port 5000                            │   │
-    │  │  ✓ Authentication Routes              │   │
-    │  │  ✓ Menu Management                    │   │
-    │  │  ✓ Order Processing                   │   │
-    │  │  ✓ Analytics Engine                   │   │
-    │  │  ✓ Admin Operations                   │   │
-    │  └────────────────┬──────────────────────┘   │
+        └──────────────────────┘
+
+```| User Authentication | ✅ Live | JWT-based with bcrypt hashing |```
+
+
+
+### Kubernetes Deployment Architecture| Order Management | ✅ Live | Create, track, and confirm orders |
+
+
+
+```| Menu Management | ✅ Live | Admin CRUD operations |## Documentation
+
+┌──────────────────────────────────────────────────────────────┐
+
+│           Kubernetes Cluster (Production)                    │| Analytics Dashboard | ✅ Live | Real-time order insights |
+
+│  ┌─────────────────────────────────────────────────────────┐ │
+
+│  │ Namespace: food-ordering                                │ │| Multi-User Admin Panel | ✅ Live | Role-based access control |- `docker-command-readme.md` - Docker build/run commands
+
+│  ├─────────────────────────────────────────────────────────┤ │
+
+│  │ Deployments:                                            │ │| Docker Deployment | ✅ Live | Single-command deployment |- `k8s/README.md` - Kubernetes setup commands
+
+│  │  ┌─────────────────────────────────────────────────┐    │ │
+
+│  │  │ Backend (replicas: 3)                          │    │ │| Kubernetes Ready | ✅ Live | Complete K8s manifests provided |- `SETUP.md` - project setup notes
+
+│  │  │ - Requests: 100m CPU, 256Mi Memory             │    │ │
+
+│  │  │ - Limits: 500m CPU, 512Mi Memory               │    │ │| CI/CD Automation | ✅ Live | Jenkins pipeline with auto-deploy |- `MIGRATION.md` - migration background
+
+│  │  │ - HPA: min 2, max 10 (CPU 70%)                 │    │ │
+
+│  │  └─────────────────────────────────────────────────┘    │ │- `TROUBLESHOOTING.md` - common fixes
+
+│  │                                                         │ │
+
+│  │  ┌─────────────────────────────────────────────────┐    │ │---
+
+│  │  │ Frontend (replicas: 2, Nginx + SPA)            │    │ │
+
+│  │  │ - Requests: 50m CPU, 128Mi Memory              │    │ │## Note
+
+│  │  │ - Limits: 200m CPU, 256Mi Memory               │    │ │
+
+│  │  └─────────────────────────────────────────────────┘    │ │## 🏗️ Architecture
+
+│  │                                                         │ │
+
+│  │  ┌─────────────────────────────────────────────────┐    │ │Legacy MySQL-only files were removed because the current application uses MongoDB end to end.
+
+│  │  │ Admin Panel (replicas: 2, Nginx + SPA)         │    │ │
+
+│  │  │ - Requests: 50m CPU, 128Mi Memory              │    │ │### System Architecture
+
+│  │  │ - Limits: 200m CPU, 256Mi Memory               │    │ │
+
+│  │  └─────────────────────────────────────────────────┘    │ │```
+
+│  │                                                         │ │┌─────────────────────────────────────────────────────────────┐
+
+│  │  ┌─────────────────────────────────────────────────┐    │ ││                    User Layer                               │
+
+│  │  │ MongoDB (StatefulSet, replicas: 1)             │    │ ││  ┌──────────────────┐         ┌──────────────────┐          │
+
+│  │  │ - Persistent Volume: 20Gi                      │    │ ││  │ Customer App     │         │ Admin Dashboard  │          │
+
+│  │  │ - Requests: 200m CPU, 512Mi Memory             │    │ ││  │ (React 18)       │         │ (React 18)       │          │
+
+│  │  │ - Limits: 1000m CPU, 1Gi Memory                │    │ ││  │ Port 5173        │         │ Port 5174/8080   │          │
+
+│  │  └─────────────────────────────────────────────────┘    │ ││  └────────┬─────────┘         └────────┬─────────┘          │
+
+│  │                                                         │ │└───────────┼─────────────────────────────┼──────────────────┘
+
+│  │ Services:                                               │ │            │                            │
+
+│  │  • Backend: LoadBalancer (internal routing)             │ │    ┌───────┴────────────────────────────┴────────┐
+
+│  │  • Frontend: LoadBalancer (external, port 80)          │ │    │    HTTP/REST API Layer (CORS-Enabled)       │
+
+│  │  • Admin: LoadBalancer (external, port 8080)           │ │    │                                              │
+
+│  │  • MongoDB: ClusterIP (internal only)                  │ │    │  ┌──────────────────────────────────────┐   │
+
+│  │                                                         │ │    │  │  Backend API (Node.js/Express)       │   │
+
+│  │ ConfigMaps & Secrets:                                   │ │    │  │  Port 5000                            │   │
+
+│  │  • backend-config (PORT, NODE_ENV)                     │ │    │  │  ✓ Authentication Routes              │   │
+
+│  │  • food-ordering-secret (DB creds, JWT)                │ │    │  │  ✓ Menu Management                    │   │
+
+│  │                                                         │ │    │  │  ✓ Order Processing                   │   │
+
+│  └─────────────────────────────────────────────────────────┘ │    │  │  ✓ Analytics Engine                   │   │
+
+└──────────────────────────────────────────────────────────────┘    │  │  ✓ Admin Operations                   │   │
+
+```    │  └────────────────┬──────────────────────┘   │
+
     └────────────────────┼──────────────────────────┘
-                         │
+
+---                         │
+
             ┌────────────┴─────────────┐
-            │                          │
+
+## 🔄 CI/CD Pipeline (GitHub Actions → ArgoCD)            │                          │
+
     ┌───────▼────────────┐   ┌────────▼────────┐
-    │  MongoDB Database  │   │ Authentication  │
+
+### GitHub Actions Workflow    │  MongoDB Database  │   │ Authentication  │
+
     │  Port 27017        │   │ (JWT + bcrypt)  │
-    │  • Users           │   └─────────────────┘
+
+**Trigger**: On every `git push` to `main` branch    │  • Users           │   └─────────────────┘
+
     │  • Food Items      │
-    │  • Orders          │
-    │  • Admin Sessions  │
-    └────────────────────┘
 
-```
+```    │  • Orders          │
 
-### Deployment Topologies
+┌─────────────────────────────────────────────────────────────┐    │  • Admin Sessions  │
 
-#### Docker Compose (Development/Small Production)
+│ 1. Code Push to GitHub (main branch)                        │    └────────────────────┘
 
-```
-┌─────────────────────────────────────────┐
-│       Docker Compose Stack              │
-├─────────────────────────────────────────┤
-│ ┌────────────────────────────────────┐  │
-│ │ Network: bridge                    │  │
-│ ├────────────────────────────────────┤  │
-│ │ Services:                          │  │
-│ │  • MongoDB (service_healthy)       │  │
-│ │  • Backend (depends_on: mongodb)   │  │
-│ │  • Frontend (depends_on: backend)  │  │
-│ │  • Admin-Panel (depends_on: backend)│  │
-│ │  • Volume: mongodb_data (persist)  │  │
-│ └────────────────────────────────────┘  │
-└─────────────────────────────────────────┘
-```
+└──────────────────┬──────────────────────────────────────────┘
 
-#### Kubernetes (Enterprise Production)
+                   │```
 
-```
-┌──────────────────────────────────────────────────────────┐
-│            Kubernetes Cluster (K8s)                      │
-│  ┌────────────────────────────────────────────────────┐  │
-│  │ Namespace: food-ordering                           │  │
-│  ├────────────────────────────────────────────────────┤  │
-│  │ Deployments:                                       │  │
-│  │  • MongoDB (StatefulSet with PVC)                 │  │
-│  │  • Backend (Replicas: 3, LoadBalancer)            │  │
-│  │  • Frontend (Replicas: 2, NodePort)               │  │
-│  │  • Admin-Panel (Replicas: 2, NodePort)            │  │
-│  │                                                    │  │
-│  │ Services:                                          │  │
-│  │  • MongoDB: ClusterIP (internal)                  │  │
-│  │  • Backend: LoadBalancer (external)               │  │
-│  │  • Frontend: NodePort 30080                       │  │
+┌──────────────────▼──────────────────────────────────────────┐
+
+│ 2. GitHub Actions Triggered                                │### Deployment Topologies
+
+│    ├─ Checkout Code                                        │
+
+│    ├─ Run Tests                                            │#### Docker Compose (Development/Small Production)
+
+│    └─ Build Docker Images                                 │
+
+└──────────────────┬──────────────────────────────────────────┘```
+
+                   │┌─────────────────────────────────────────┐
+
+┌──────────────────▼──────────────────────────────────────────┐│       Docker Compose Stack              │
+
+│ 3. Push Docker Images to Registry                          │├─────────────────────────────────────────┤
+
+│    ├─ jenish-chauhan/food-ordering-backend:v1.0.1          ││ ┌────────────────────────────────────┐  │
+
+│    ├─ jenish-chauhan/food-ordering-frontend:v1.0.1         ││ │ Network: bridge                    │  │
+
+│    └─ jenish-chauhan/food-ordering-admin:v1.0.1            ││ ├────────────────────────────────────┤  │
+
+└──────────────────┬──────────────────────────────────────────┘│ │ Services:                          │  │
+
+                   ││ │  • MongoDB (service_healthy)       │  │
+
+┌──────────────────▼──────────────────────────────────────────┐│ │  • Backend (depends_on: mongodb)   │  │
+
+│ 4. Update Kustomize Overlays                               ││ │  • Frontend (depends_on: backend)  │  │
+
+│    └─ Update image tags in:                                ││ │  • Admin-Panel (depends_on: backend)│  │
+
+│       - kustomize/overlays/prod/kustomization.yaml         ││ │  • Volume: mongodb_data (persist)  │  │
+
+│       - kustomize/overlays/staging/kustomization.yaml      ││ └────────────────────────────────────┘  │
+
+└──────────────────┬──────────────────────────────────────────┘└─────────────────────────────────────────┘
+
+                   │```
+
+┌──────────────────▼──────────────────────────────────────────┐
+
+│ 5. Commit & Push Changes to GitOps Repo                    │#### Kubernetes (Enterprise Production)
+
+│    └─ Trigger ArgoCD reconciliation                        │
+
+└──────────────────┬──────────────────────────────────────────┘```
+
+                   │┌──────────────────────────────────────────────────────────┐
+
+        ┌──────────┴─────────────┐│            Kubernetes Cluster (K8s)                      │
+
+        │ ArgoCD Detects Change  ││  ┌────────────────────────────────────────────────────┐  │
+
+        └──────────┬─────────────┘│  │ Namespace: food-ordering                           │  │
+
+                   ││  ├────────────────────────────────────────────────────┤  │
+
+        ┌──────────▼──────────────┐│  │ Deployments:                                       │  │
+
+        │ Auto-Sync & Deploy      ││  │  • MongoDB (StatefulSet with PVC)                 │  │
+
+        │ (Declarative)           ││  │  • Backend (Replicas: 3, LoadBalancer)            │  │
+
+        └──────────┬──────────────┘│  │  • Frontend (Replicas: 2, NodePort)               │  │
+
+                   ││  │  • Admin-Panel (Replicas: 2, NodePort)            │  │
+
+        ┌──────────▼──────────────┐│  │                                                    │  │
+
+        │ Kubernetes Update       ││  │ Services:                                          │  │
+
+        │ (Rolling Deployment)    ││  │  • MongoDB: ClusterIP (internal)                  │  │
+
+        └─────────────────────────┘│  │  • Backend: LoadBalancer (external)               │  │
+
+```│  │  • Frontend: NodePort 30080                       │  │
+
 │  │  • Admin: NodePort 30081                          │  │
-│  │                                                    │  │
+
+### Step-by-Step CI/CD Flow│  │                                                    │  │
+
 │  │ ConfigMaps & Secrets:                             │  │
-│  │  • backend-config (PORT, NODE_ENV, etc)          │  │
-│  │  • web-config (API URL, Admin URL)               │  │
-│  │  • food-ordering-secret (DB creds, JWT)          │  │
-│  └────────────────────────────────────────────────────┘  │
-└──────────────────────────────────────────────────────────┘
-```
 
----
+1. **Code Commit**: Developer pushes code to `main` branch│  │  • backend-config (PORT, NODE_ENV, etc)          │  │
 
-## ✨ Features
+2. **GitHub Actions Triggered**: Automated workflow starts│  │  • web-config (API URL, Admin URL)               │  │
 
-### Customer Features
+   - Build Docker images for all services│  │  • food-ordering-secret (DB creds, JWT)          │  │
 
-- 🔐 **User Authentication**: Secure registration and login with JWT
+   - Tag with commit SHA and `latest`│  └────────────────────────────────────────────────────┘  │
+
+   - Run security scans and tests└──────────────────────────────────────────────────────────┘
+
+3. **Push to Docker Registry**: Images stored on Docker Hub/ECR```
+
+4. **Update GitOps Manifests**: Kustomize overlay updated with new image tags
+
+5. **ArgoCD Reconciliation**: Detects manifest changes automatically---
+
+6. **Kubernetes Deployment**: ArgoCD applies changes to cluster
+
+   - Rolling update (maintains availability)## ✨ Features
+
+   - Health checks ensure successful deployment
+
+   - Auto-rollback on failure### Customer Features
+
+
+
+---- 🔐 **User Authentication**: Secure registration and login with JWT
+
 - 👤 **User Profiles**: View and manage account details
-- 🍽️ **Menu Browsing**: Browse food items by category
+
+## 🔐 GitOps Workflow (ArgoCD)- 🍽️ **Menu Browsing**: Browse food items by category
+
 - 🛒 **Shopping Cart**: Add, remove, and manage items
-- 📦 **Order Placement**: Create orders with real-time tracking
+
+### What is GitOps?- 📦 **Order Placement**: Create orders with real-time tracking
+
 - 📝 **Order History**: View past and current orders
-- ⭐ **Ratings & Reviews**: Rate delivered orders
+
+GitOps is a deployment methodology where:- ⭐ **Ratings & Reviews**: Rate delivered orders
+
 - 📧 **Email Notifications**: Order confirmation and updates
 
-### Admin Features
+- **Git is the single source of truth**: All infrastructure and application configs stored in Git
 
-- 📊 **Dashboard Analytics**: Real-time order metrics
-- 🍔 **Menu Management**: Add/edit/delete food items
+- **Declarative**: You declare desired state, system achieves it### Admin Features
+
+- **Automated**: ArgoCD continuously reconciles actual vs desired state
+
+- **Observable**: Full audit trail in Git commits- 📊 **Dashboard Analytics**: Real-time order metrics
+
+- **Secure**: No manual `kubectl apply` commands- 🍔 **Menu Management**: Add/edit/delete food items
+
 - 📦 **Order Management**: View, update, and fulfill orders
-- 👥 **Admin Panel**: Multi-admin support with admin authentication
+
+### ArgoCD in This Project- 👥 **Admin Panel**: Multi-admin support with admin authentication
+
 - 📈 **Analytics**: Sales trends, popular items, revenue metrics
-- 🔔 **Real-time Updates**: Live order status notifications
 
-### System Features
+**Repository Structure**:- 🔔 **Real-time Updates**: Live order status notifications
 
-- 🐳 **Docker Support**: Ready-to-run containerized deployment
-- ☸️ **Kubernetes Ready**: Complete K8s manifests included
-- 🤖 **CI/CD Pipeline**: Automated Jenkins deployments
-- 🔍 **Health Checks**: Service health monitoring
-- 🔐 **Security**: CORS, JWT, password hashing, input validation
-- 📊 **Logging**: Comprehensive application logging
-- 🔄 **Auto Restart**: Container restart policies
 
----
 
-## 🛠️ Tech Stack
+```### System Features
 
-### Frontend & Admin Panel
+├─ application-repo (this repo)
 
-| Technology   | Version | Purpose                    |
-| ------------ | ------- | -------------------------- |
-| React        | 18.x    | UI framework               |
-| Vite         | 5.x     | Build tool & dev server    |
-| Tailwind CSS | 4.x     | Styling                    |
-| Axios        | 1.x     | HTTP client                |
-| React Router | 6.x     | Client-side routing        |
-| Lucide React | Latest  | Icon library               |
+│  ├─ backend/- 🐳 **Docker Support**: Ready-to-run containerized deployment
+
+│  ├─ frontend/- ☸️ **Kubernetes Ready**: Complete K8s manifests included
+
+│  ├─ admin-panel/- 🤖 **CI/CD Pipeline**: Automated Jenkins deployments
+
+│  └─ .github/workflows/- 🔍 **Health Checks**: Service health monitoring
+
+│- 🔐 **Security**: CORS, JWT, password hashing, input validation
+
+└─ gitops-repo (separate)- 📊 **Logging**: Comprehensive application logging
+
+   ├─ kustomize/- 🔄 **Auto Restart**: Container restart policies
+
+   │  ├─ base/
+
+   │  │  ├─ backend/---
+
+   │  │  ├─ frontend/
+
+   │  │  ├─ admin-panel/## 🛠️ Tech Stack
+
+   │  │  └─ mongodb/
+
+   │  │### Frontend & Admin Panel
+
+   │  └─ overlays/
+
+   │     ├─ dev/| Technology   | Version | Purpose                    |
+
+   │     ├─ staging/| ------------ | ------- | -------------------------- |
+
+   │     └─ prod/| React        | 18.x    | UI framework               |
+
+   │| Vite         | 5.x     | Build tool & dev server    |
+
+   └─ argocd/| Tailwind CSS | 4.x     | Styling                    |
+
+      ├─ applications.yaml| Axios        | 1.x     | HTTP client                |
+
+      └─ appproject.yaml| React Router | 6.x     | Client-side routing        |
+
+```| Lucide React | Latest  | Icon library               |
+
 | Recharts     | 2.x     | Data visualization (Admin) |
+
+**ArgoCD Application Deployment**:
 
 ### Backend
 
-| Technology        | Version   | Purpose                 |
-| ----------------- | --------- | ----------------------- |
-| Node.js           | 20-alpine | Runtime environment     |
-| Express           | 4.18.x    | Web framework           |
-| MongoDB           | 7.x       | NoSQL database          |
-| Mongoose          | 9.x       | ODM/Schema validation   |
-| JWT               | 9.x       | Authentication          |
-| bcrypt            | 5.x       | Password hashing        |
-| CORS              | 2.x       | Cross-origin support    |
-| Socket.io         | 4.x       | Real-time communication |
-| express-validator | 7.x       | Input validation        |
+```yaml
 
-### DevOps & Deployment
+# kustomize/overlays/prod/argocd-app.yaml| Technology        | Version   | Purpose                 |
 
-| Tool           | Version | Purpose                      |
-| -------------- | ------- | ---------------------------- |
-| Docker         | Latest  | Containerization             |
-| Docker Compose | 3.8+    | Orchestration (dev)          |
-| Kubernetes     | 1.24+   | Orchestration (production)   |
-| Jenkins        | 2.x+    | CI/CD pipeline               |
-| Nginx          | Alpine  | Reverse proxy & static serve |
-| MongoDB Docker | 7.x     | Database container           |
+apiVersion: argoproj.io/v1alpha1| ----------------- | --------- | ----------------------- |
 
----
+kind: Application| Node.js           | 20-alpine | Runtime environment     |
 
-## 🚀 Quick Start
+metadata:| Express           | 4.18.x    | Web framework           |
 
-### Prerequisites
+  name: food-ordering-prod| MongoDB           | 7.x       | NoSQL database          |
 
-```bash
+  namespace: argocd| Mongoose          | 9.x       | ODM/Schema validation   |
+
+spec:| JWT               | 9.x       | Authentication          |
+
+  project: food-ordering| bcrypt            | 5.x       | Password hashing        |
+
+  source:| CORS              | 2.x       | Cross-origin support    |
+
+    repoURL: https://github.com/your-org/gitops-repo| Socket.io         | 4.x       | Real-time communication |
+
+    targetRevision: main| express-validator | 7.x       | Input validation        |
+
+    path: kustomize/overlays/prod
+
+  destination:### DevOps & Deployment
+
+    server: https://kubernetes.default.svc
+
+    namespace: food-ordering| Tool           | Version | Purpose                      |
+
+  syncPolicy:| -------------- | ------- | ---------------------------- |
+
+    automated:| Docker         | Latest  | Containerization             |
+
+      prune: true          # Auto-remove resources not in Git| Docker Compose | 3.8+    | Orchestration (dev)          |
+
+      selfHeal: true       # Auto-sync if cluster drift detected| Kubernetes     | 1.24+   | Orchestration (production)   |
+
+    syncOptions:| Jenkins        | 2.x+    | CI/CD pipeline               |
+
+    - CreateNamespace=true| Nginx          | Alpine  | Reverse proxy & static serve |
+
+    retry:| MongoDB Docker | 7.x     | Database container           |
+
+      limit: 5
+
+      backoff:---
+
+        duration: 5s
+
+        factor: 2## 🚀 Quick Start
+
+        maxDuration: 3m
+
+```### Prerequisites
+
+
+
+**Key Features**:```bash
+
 # Required
-- Node.js 16+ (for local development)
-- npm or yarn
-- Docker & Docker Compose (for containerized deployment)
-- MongoDB (local) OR MongoDB Atlas (cloud)
-- Git
 
-# Optional
+- ✅ **Auto-Sync**: Changes in Git automatically deployed to cluster- Node.js 16+ (for local development)
+
+- ✅ **Self-Healing**: If someone manually changes cluster, ArgoCD reverts it- npm or yarn
+
+- ✅ **Pruning**: Removes K8s resources when deleted from Git- Docker & Docker Compose (for containerized deployment)
+
+- ✅ **GitOps GUI**: Visual monitoring in ArgoCD dashboard- MongoDB (local) OR MongoDB Atlas (cloud)
+
+- ✅ **Rollback**: Simple rollback by reverting Git commit- Git
+
+
+
+**Workflow Example**:# Optional
+
 - Kubernetes cluster (for K8s deployment)
-- Jenkins (for CI/CD automation)
-```
 
-### Option 1: Docker Compose (Recommended)
+```bash- Jenkins (for CI/CD automation)
 
-```bash
-# Clone repository
-git clone https://github.com/jenish-chauhan/Jerry-s-chaska-Online-Food-order.git
-cd FOOD-ORDERING-SYS
+# 1. Developer updates Kustomize overlay```
 
-# Create .env file with secrets
-cat > .env << EOF
-MONGO_PASSWORD=your_secure_mongo_password
-JWT_SECRET=your_jwt_secret_key
-ADMIN_EMAIL=admin@example.com
+vi kustomize/overlays/prod/backend/kustomization.yaml
+
+# Change: image tag from v1.0.0 -> v1.0.1### Option 1: Docker Compose (Recommended)
+
+
+
+# 2. Commit and push```bash
+
+git add kustomize/overlays/prod/backend/kustomization.yaml# Clone repository
+
+git commit -m "Deploy backend v1.0.1 to production"git clone https://github.com/jenish-chauhan/Jerry-s-chaska-Online-Food-order.git
+
+git push origin maincd FOOD-ORDERING-SYS
+
+
+
+# 3. ArgoCD detects change (within 3 minutes by default)# Create .env file with secrets
+
+# 4. ArgoCD syncs manifest to Kubernetescat > .env << EOF
+
+# 5. Kubernetes rolling update beginsMONGO_PASSWORD=your_secure_mongo_password
+
+# 6. Full audit trail in Git historyJWT_SECRET=your_jwt_secret_key
+
+```ADMIN_EMAIL=admin@example.com
+
 ADMIN_PASSWORD=your_admin_password
-ADMIN_NAME=Admin User
+
+---ADMIN_NAME=Admin User
+
 EOF
 
+## 📂 Folder Structure
+
 # Build and start all services
-docker-compose up --build -d
 
-# Verify all services are running
-docker-compose ps
+```docker-compose up --build -d
 
-# Check logs
-docker-compose logs -f
-```
+FOOD-ORDERING-SYS/
 
-**Access the application:**
+│# Verify all services are running
 
-- Frontend: http://localhost:5173
-- Admin: http://localhost:8080
-- API: http://localhost:5000
+├── 📁 backend/                         # Node.js REST APIdocker-compose ps
 
-### Option 2: Local Development
+│   ├── src/
 
-**Terminal 1 - Backend:**
+│   │   ├── app.js                      # Express app & middleware# Check logs
 
-```bash
-cd backend
-npm install
-cp .env.example .env  # Configure with your values
-npm run dev
-# Runs on: http://localhost:5000
-```
+│   │   ├── config/database.js          # MongoDB connectiondocker-compose logs -f
 
-**Terminal 2 - Frontend:**
+│   │   ├── controllers/                # Business logic```
 
-```bash
-cd frontend
-npm install
-npm run dev
-# Runs on: http://localhost:5173
-```
+│   │   ├── models/                     # Mongoose schemas
 
-**Terminal 3 - Admin Panel:**
+│   │   ├── routes/                     # API endpoints**Access the application:**
 
-```bash
-cd admin-panel
-npm install
-npm run dev
-# Runs on: http://localhost:5174
-```
+│   │   ├── middleware/                 # Auth & validation
 
-**Terminal 4 - MongoDB:**
+│   │   └── services/                   # Utilities- Frontend: http://localhost:5173
 
-```bash
-# macOS
+│   ├── Dockerfile                      # Multi-stage build- Admin: http://localhost:8080
+
+│   └── package.json                    # Dependencies- API: http://localhost:5000
+
+│
+
+├── 📁 frontend/                        # React Customer App### Option 2: Local Development
+
+│   ├── src/
+
+│   │   ├── App.jsx**Terminal 1 - Backend:**
+
+│   │   ├── pages/
+
+│   │   ├── components/```bash
+
+│   │   ├── services/api.js             # Axios clientcd backend
+
+│   │   └── context/                    # State managementnpm install
+
+│   ├── Dockerfile                      # Multi-stage Nginx buildcp .env.example .env  # Configure with your values
+
+│   └── package.jsonnpm run dev
+
+│# Runs on: http://localhost:5000
+
+├── 📁 admin-panel/                     # React Admin Dashboard```
+
+│   ├── src/
+
+│   │   ├── App.jsx**Terminal 2 - Frontend:**
+
+│   │   ├── pages/
+
+│   │   ├── components/```bash
+
+│   │   └── services/api.jscd frontend
+
+│   ├── Dockerfilenpm install
+
+│   └── package.jsonnpm run dev
+
+│# Runs on: http://localhost:5173
+
+├── 📁 .github/                         # GitHub Actions Workflows```
+
+│   └── workflows/
+
+│       ├── build-and-push.yml**Terminal 3 - Admin Panel:**
+
+│       └── deploy.yml
+
+│```bash
+
+├── 📁 k8s/                             # Kubernetes Manifestscd admin-panel
+
+│   ├── backend-deployment.ymlnpm install
+
+│   ├── frontend-deployment.ymlnpm run dev
+
+│   ├── admin-deployment.yml# Runs on: http://localhost:5174
+
+│   └── mongodb-deployment.yml```
+
+│
+
+├── docker-compose.yml                  # Docker Compose (dev/testing)**Terminal 4 - MongoDB:**
+
+├── Jenkinsfile                         # Jenkins pipeline
+
+└── README.md                           # This file```bash
+
+```# macOS
+
 brew services start mongodb-community
-
-# Linux
-sudo systemctl start mongod
-
-# Windows (if installed)
-net start MongoDB
-```
-
-### Option 3: MongoDB Atlas (Cloud)
-
-```bash
-# 1. Create account at https://www.mongodb.com/cloud/atlas
-# 2. Create a cluster
-# 3. Get connection string
-# 4. Update MONGO_URI in .env or docker-compose.yml
-# Example:
-# MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/jerrys_chaska?retryWrites=true&w=majority
-```
 
 ---
 
-## 🔄 DevOps & Deployment
+# Linux
 
-### Docker Commands
+## 🛠️ Tech Stacksudo systemctl start mongod
 
-```bash
+
+
+### Frontend Layer# Windows (if installed)
+
+| Technology | Version | Purpose |net start MongoDB
+
+|-----------|---------|---------|```
+
+| React | 18.x | UI framework |
+
+| Vite | 5.x | Build tool, dev server |### Option 3: MongoDB Atlas (Cloud)
+
+| Tailwind CSS | 4.x | Styling |
+
+| Axios | 1.x | HTTP client |```bash
+
+| React Router | 6.x | Client routing |# 1. Create account at https://www.mongodb.com/cloud/atlas
+
+| Lucide React | Latest | Icons |# 2. Create a cluster
+
+| Recharts | 2.x | Analytics charts (Admin) |# 3. Get connection string
+
+# 4. Update MONGO_URI in .env or docker-compose.yml
+
+### Backend Layer# Example:
+
+| Technology | Version | Purpose |# MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/jerrys_chaska?retryWrites=true&w=majority
+
+|-----------|---------|---------|```
+
+| Node.js | 20-alpine | Runtime |
+
+| Express | 4.18.x | Web framework |---
+
+| MongoDB | 7.x | NoSQL database |
+
+| Mongoose | 9.x | ODM |## 🔄 DevOps & Deployment
+
+| JWT | 9.x | Authentication |
+
+| bcrypt | 5.x | Password hashing |### Docker Commands
+
+| CORS | 2.x | Cross-origin requests |
+
+| express-validator | 7.x | Input validation |```bash
+
 # Build specific services
-docker-compose build backend
-docker-compose build frontend
-docker-compose build admin-panel
 
-# Start services
-docker-compose up -d
-docker-compose up --build -d  # Build and start
+### DevOps & Infrastructuredocker-compose build backend
 
-# Stop services
+| Tool | Purpose |docker-compose build frontend
+
+|------|---------|docker-compose build admin-panel
+
+| Docker | Containerization |
+
+| Kubernetes | Orchestration |# Start services
+
+| GitHub Actions | CI pipeline |docker-compose up -d
+
+| ArgoCD | CD/GitOps |docker-compose up --build -d  # Build and start
+
+| Kustomize | Configuration management |
+
+| Nginx | Reverse proxy, SPA serving |# Stop services
+
 docker-compose down
-docker-compose down -v  # Remove volumes too
 
-# View logs
+---docker-compose down -v  # Remove volumes too
+
+
+
+## 📋 Prerequisites# View logs
+
 docker-compose logs -f backend
-docker-compose logs -f frontend
-docker-compose logs --tail=100 -f
 
-# Execute commands in containers
-docker-compose exec backend npm test
-docker-compose exec backend node -e "console.log('test')"
+### Local Developmentdocker-compose logs -f frontend
 
-# Health check
-docker-compose ps  # Check status
-curl http://localhost:5000/health
-```
+- Docker 20.10+docker-compose logs --tail=100 -f
+
+- Docker Compose 1.29+
+
+- Node.js 16+# Execute commands in containers
+
+- npm or yarndocker-compose exec backend npm test
+
+- Gitdocker-compose exec backend node -e "console.log('test')"
+
+
+
+### Kubernetes Deployment# Health check
+
+- Kubernetes 1.24+ clusterdocker-compose ps  # Check status
+
+- kubectl 1.24+curl http://localhost:5000/health
+
+- ArgoCD 2.4+ (installed in cluster)```
+
+- Docker registry access (Docker Hub, ECR, etc.)
 
 ### Kubernetes Deployment
 
-**Prerequisites:**
+### GitHub Setup
 
-```bash
+- GitHub account with Actions enabled**Prerequisites:**
+
+- Docker Hub/ECR credentials (for pushing images)
+
+- GitOps repository (separate repo for manifests)```bash
+
 # Install kubectl
-# Setup kubeconfig
+
+---# Setup kubeconfig
+
 # Have Docker images pushed to registry
-```
 
-**Deploy to Kubernetes:**
+## 🚀 Setup & Installation```
 
-```bash
-# 1. Update Jenkinsfile with your configuration
-# - Set PUBLIC_HOST to your domain/IP
-# - Configure Docker Hub credentials
+
+
+### 1. Local Development (Docker Compose)**Deploy to Kubernetes:**
+
+
+
+```bash```bash
+
+# Clone the repository# 1. Update Jenkinsfile with your configuration
+
+git clone https://github.com/jenish-chauhan/Jerry-s-chaska-Online-Food-order.git# - Set PUBLIC_HOST to your domain/IP
+
+cd FOOD-ORDERING-SYS# - Configure Docker Hub credentials
+
 # - Set Kubernetes cluster access
 
-# 2. Jenkins will handle:
-cd k8s/
+# Create .env file with required secrets
 
-# Manual deployment (without Jenkins):
-kubectl apply -f namespace.yml
-kubectl create secret generic food-ordering-secret \
-  --from-literal=MONGO_PASSWORD=<password> \
-  --from-literal=JWT_SECRET=<secret> \
+cat > .env << EOF# 2. Jenkins will handle:
+
+MONGO_PASSWORD=your_secure_password_herecd k8s/
+
+JWT_SECRET=your_jwt_secret_here
+
+ADMIN_EMAIL=admin@example.com# Manual deployment (without Jenkins):
+
+ADMIN_PASSWORD=secure_admin_passwordkubectl apply -f namespace.yml
+
+ADMIN_NAME=Admin Userkubectl create secret generic food-ordering-secret \
+
+NODE_ENV=development  --from-literal=MONGO_PASSWORD=<password> \
+
+EOF  --from-literal=JWT_SECRET=<secret> \
+
   -n food-ordering
 
-kubectl apply -f mongodb-pvc.yml
+# Start all services
+
+docker-compose up --build -dkubectl apply -f mongodb-pvc.yml
+
 kubectl apply -f mongodb-deployment.yml
-kubectl apply -f mongodb-service.yml
-kubectl apply -f backend-deployment.yml
+
+# Verify serviceskubectl apply -f mongodb-service.yml
+
+docker-compose pskubectl apply -f backend-deployment.yml
+
 kubectl apply -f backend-service.yml
-kubectl apply -f frontend-deployment.yml
-kubectl apply -f frontend-service.yml
-kubectl apply -f admin-panel-deployment.yml
+
+# View logskubectl apply -f frontend-deployment.yml
+
+docker-compose logs -fkubectl apply -f frontend-service.yml
+
+```kubectl apply -f admin-panel-deployment.yml
+
 kubectl apply -f admin-panel-service.yml
 
-# Verify deployment
-kubectl get all -n food-ordering
-kubectl logs -f deployment/backend -n food-ordering
-```
+**Access Points:**
 
-**Access services:**
+- Frontend: http://localhost:5173# Verify deployment
 
-```bash
-# Port forward for testing
-kubectl port-forward svc/backend 5000:5000 -n food-ordering
-kubectl port-forward svc/frontend 5173:80 -n food-ordering
-kubectl port-forward svc/admin-panel 8080:80 -n food-ordering
+- Backend: http://localhost:5000kubectl get all -n food-ordering
 
-# NodePort access (if configured)
+- Admin: http://localhost:8080kubectl logs -f deployment/backend -n food-ordering
+
+- MongoDB: mongodb://localhost:27017```
+
+
+
+### 2. Local Development (Without Docker)**Access services:**
+
+
+
+**Terminal 1 - Backend:**```bash
+
+```bash# Port forward for testing
+
+cd backendkubectl port-forward svc/backend 5000:5000 -n food-ordering
+
+npm installkubectl port-forward svc/frontend 5173:80 -n food-ordering
+
+cp .env.example .envkubectl port-forward svc/admin-panel 8080:80 -n food-ordering
+
+npm run dev  # Runs on port 5000
+
+```# NodePort access (if configured)
+
 # Frontend: http://<node-ip>:30080
-# Admin: http://<node-ip>:30081
-```
 
-### Jenkins CI/CD Pipeline
+**Terminal 2 - Frontend:**# Admin: http://<node-ip>:30081
 
-**Setup Jenkins:**
+```bash```
 
-1. **Configure Credentials:**
+cd frontend
 
-   ```
-   Jenkins → Manage Credentials
-   Add: dockerhub-cred (Docker Hub username/password)
-   ```
+npm install### Jenkins CI/CD Pipeline
 
-2. **Create Pipeline Job:**
+npm run dev  # Runs on port 5173
 
-   ```
-   Jenkins → New Item → Pipeline
-   Pipeline script from SCM:
-   - Repository URL: Your GitHub repo
-   - Script path: Jenkinsfile
-   ```
+```**Setup Jenkins:**
 
-3. **Trigger Automation:**
-   ```
-   GitHub Webhook → Jenkins
-   - Go to GitHub → Settings → Webhooks
-   - Add: http://your-jenkins:8080/github-webhook/
-   - Events: Push events
-   ```
 
-**Pipeline Stages:**
 
-```
-Checkout Code
-    ↓
-Build & Push Docker Images
-    ↓
-Deploy to Kubernetes
-    ↓
-Scale Deployments
-    ↓
-Verify Health Checks
-```
-
-**View Pipeline:**
-
-- Jenkins UI: http://your-jenkins:8080/
-- Logs: Jenkins → Build → Console Output
-
-### Monitoring & Health Checks
+**Terminal 3 - Admin Panel:**1. **Configure Credentials:**
 
 ```bash
-# Backend health check
-curl http://localhost:5000/health
 
-# Docker health status
+cd admin-panel   ```
+
+npm install   Jenkins → Manage Credentials
+
+npm run dev  # Runs on port 5174   Add: dockerhub-cred (Docker Hub username/password)
+
+```   ```
+
+
+
+**Terminal 4 - MongoDB:**2. **Create Pipeline Job:**
+
+```bash
+
+# macOS   ```
+
+brew services start mongodb-community   Jenkins → New Item → Pipeline
+
+   Pipeline script from SCM:
+
+# Linux   - Repository URL: Your GitHub repo
+
+sudo systemctl start mongod   - Script path: Jenkinsfile
+
+````
+
+# Or use Docker
+
+docker run -d -p 27017:27017 mongo:73. **Trigger Automation:**
+
+`   `
+
+GitHub Webhook → Jenkins
+
+### 3. Kubernetes Deployment (Production) - Go to GitHub → Settings → Webhooks
+
+- Add: http://your-jenkins:8080/github-webhook/
+
+**Prerequisites:** - Events: Push events
+
+- K8s cluster running (EKS, GKE, AKS, or self-hosted) ```
+
+- kubectl configured
+
+- ArgoCD installed in cluster (`argocd` namespace)**Pipeline Stages:**
+
+- Docker images pushed to registry
+
+````
+
+**Deployment Steps:**Checkout Code
+
+    ↓
+
+```bashBuild & Push Docker Images
+
+# 1. Create namespace    ↓
+
+kubectl create namespace food-orderingDeploy to Kubernetes
+
+    ↓
+
+# 2. Create secrets for credentialsScale Deployments
+
+kubectl create secret generic food-ordering-secret \    ↓
+
+  --from-literal=MONGO_PASSWORD=your_password \Verify Health Checks
+
+  --from-literal=JWT_SECRET=your_jwt_secret \```
+
+  --from-literal=ADMIN_PASSWORD=your_admin_password \
+
+  -n food-ordering**View Pipeline:**
+
+
+
+# 3. Apply Kustomize overlays- Jenkins UI: http://your-jenkins:8080/
+
+kubectl apply -k kustomize/overlays/prod- Logs: Jenkins → Build → Console Output
+
+
+
+# 4. Verify deployment### Monitoring & Health Checks
+
+kubectl get all -n food-ordering
+
+kubectl get pods -n food-ordering -w  # Watch pods```bash
+
+# Backend health check
+
+# 5. Check service statuscurl http://localhost:5000/health
+
+kubectl get svc -n food-ordering
+
+```# Docker health status
+
 docker inspect jerrys_chaska_backend | grep -A 5 "Health"
 
+### 4. ArgoCD Setup & GitOps Deployment
+
 # Kubernetes health
-kubectl get pods -n food-ordering
-kubectl describe pod <pod-name> -n food-ordering
 
-# Monitor resources
+**Install ArgoCD:**kubectl get pods -n food-ordering
+
+```bashkubectl describe pod <pod-name> -n food-ordering
+
+kubectl create namespace argocd
+
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml# Monitor resources
+
 kubectl top nodes
-kubectl top pods -n food-ordering
-```
 
----
+# Get ArgoCD passwordkubectl top pods -n food-ordering
 
-## 📡 API Documentation
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d```
+
+
+
+# Port-forward to ArgoCD dashboard---
+
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+
+# Access at: https://localhost:8080 (user: admin)## 📡 API Documentation
+
+````
 
 ### Base URL
 
-```
-Local:     http://localhost:5000
-Docker:    http://localhost:5000
-Kubernetes: http://<load-balancer-ip>
-```
+**Create ArgoCD Application:**
 
-### Authentication
+````
 
-All protected endpoints require JWT token in header:
+```bashLocal:     http://localhost:5000
 
-```
-Authorization: Bearer <your_jwt_token>
-```
+# Login to ArgoCDDocker:    http://localhost:5000
 
-### Endpoints
+argocd login localhost:8080 --username admin --password <password>Kubernetes: http://<load-balancer-ip>
 
-#### Authentication
+````
 
-```
-POST   /api/auth/register
-POST   /api/auth/login
-POST   /api/auth/logout
-```
+# Create application
 
-#### Menu
+kubectl apply -f - << EOF### Authentication
 
-```
-GET    /api/menu              # Get all food items
-GET    /api/menu/:id          # Get specific item
-POST   /api/menu              # Create item (Admin)
-PATCH  /api/menu/:id          # Update item (Admin)
-DELETE /api/menu/:id          # Delete item (Admin)
-```
+apiVersion: argoproj.io/v1alpha1
 
-#### Orders
+kind: ApplicationAll protected endpoints require JWT token in header:
 
-```
+metadata:
+
+name: food-ordering-prod```
+
+namespace: argocdAuthorization: Bearer <your_jwt_token>
+
+spec:```
+
+project: default
+
+source:### Endpoints
+
+    repoURL: https://github.com/your-org/gitops-repo
+
+    targetRevision: main#### Authentication
+
+    path: kustomize/overlays/prod
+
+destination:```
+
+    server: https://kubernetes.default.svcPOST   /api/auth/register
+
+    namespace: food-orderingPOST   /api/auth/login
+
+syncPolicy:POST /api/auth/logout
+
+    automated:```
+
+      prune: true
+
+      selfHeal: true#### Menu
+
+    syncOptions:
+
+      - CreateNamespace=true```
+
+EOFGET /api/menu # Get all food items
+
+GET /api/menu/:id # Get specific item
+
+# Check statusPOST /api/menu # Create item (Admin)
+
+kubectl get application -n argocdPATCH /api/menu/:id # Update item (Admin)
+
+argocd app get food-ordering-prodDELETE /api/menu/:id # Delete item (Admin)
+
+````
+
+
+
+---#### Orders
+
+
+
+## 🔄 GitHub Actions Workflow```
+
 POST   /api/orders            # Create order (Authenticated)
-GET    /api/orders/user/:id   # Get user orders
+
+### Build & Push WorkflowGET    /api/orders/user/:id   # Get user orders
+
 GET    /api/orders/:id        # Get order details
-PATCH  /api/orders/:id/confirm-pickup  # Confirm pickup
-```
+
+```yamlPATCH  /api/orders/:id/confirm-pickup  # Confirm pickup
+
+# .github/workflows/build-and-push.yml```
+
+name: Build and Push Docker Images
 
 #### Analytics
 
-```
-GET    /api/analytics/dashboard    # Get dashboard metrics
+on:
+
+  push:```
+
+    branches: [main]GET    /api/analytics/dashboard    # Get dashboard metrics
+
 GET    /api/analytics/orders       # Order analytics
-GET    /api/analytics/revenue      # Revenue data
-```
 
-#### Admin
+jobs:GET    /api/analytics/revenue      # Revenue data
 
-```
-GET    /api/admin/users       # List all users
-PATCH  /api/admin/orders/:id  # Update order status
-```
+  build:```
 
-### Example Requests
+    runs-on: ubuntu-latest
 
-**Register:**
+    #### Admin
 
-```bash
-curl -X POST http://localhost:5000/api/auth/register \
-  -H "Content-Type: application/json" \
+    steps:
+
+    - uses: actions/checkout@v3```
+
+    GET    /api/admin/users       # List all users
+
+    - name: Build & Push BackendPATCH  /api/admin/orders/:id  # Update order status
+
+      run: |```
+
+        docker build -t ${{ secrets.DOCKER_REGISTRY }}/food-ordering-backend:${{ github.sha }} ./backend
+
+        docker push ${{ secrets.DOCKER_REGISTRY }}/food-ordering-backend:${{ github.sha }}### Example Requests
+
+
+
+    - name: Build & Push Frontend**Register:**
+
+      run: |
+
+        docker build -t ${{ secrets.DOCKER_REGISTRY }}/food-ordering-frontend:${{ github.sha }} ./frontend```bash
+
+        docker push ${{ secrets.DOCKER_REGISTRY }}/food-ordering-frontend:${{ github.sha }}curl -X POST http://localhost:5000/api/auth/register \
+
+      -H "Content-Type: application/json" \
+
+    - name: Build & Push Admin  -d '{
+
+      run: |    "name": "John Doe",
+
+        docker build -t ${{ secrets.DOCKER_REGISTRY }}/food-ordering-admin:${{ github.sha }} ./admin-panel    "email": "john@example.com",
+
+        docker push ${{ secrets.DOCKER_REGISTRY }}/food-ordering-admin:${{ github.sha }}    "password": "SecurePass@123"
+
+      }'
+
+    - name: Update GitOps Manifests```
+
+      run: |
+
+        git config --global user.email "github-actions@example.com"**Login:**
+
+        git config --global user.name "GitHub Actions"
+
+        # Update kustomize overlays with new image tags```bash
+
+        # Commit and push to gitops-repocurl -X POST http://localhost:5000/api/auth/login \
+
+```  -H "Content-Type: application/json" \
+
   -d '{
-    "name": "John Doe",
-    "email": "john@example.com",
+
+---    "email": "john@example.com",
+
     "password": "SecurePass@123"
-  }'
+
+## ✨ Features  }'
+
 ```
 
-**Login:**
+### Customer Features
 
-```bash
-curl -X POST http://localhost:5000/api/auth/login \
-  -H "Content-Type: application/json" \
+- 🔐 Secure authentication (JWT + bcrypt)**Create Order:**
+
+- 👤 User profile management
+
+- 🍽️ Browse menu by category```bash
+
+- 🛒 Shopping cartcurl -X POST http://localhost:5000/api/orders \
+
+- 📦 Place and track orders  -H "Authorization: Bearer <token>" \
+
+- ⭐ Rate and review orders  -H "Content-Type: application/json" \
+
   -d '{
-    "email": "john@example.com",
-    "password": "SecurePass@123"
-  }'
+
+### Admin Features    "items": [
+
+- 📊 Real-time analytics dashboard      { "itemId": "123", "quantity": 2 }
+
+- 🍔 Food item CRUD operations    ],
+
+- 📦 Order management    "deliveryAddress": "123 Main St",
+
+- 👥 Multi-admin support    "phoneNumber": "555-1234"
+
+- 📈 Sales metrics and reports  }'
+
 ```
 
-**Create Order:**
+### DevOps Features
 
-```bash
-curl -X POST http://localhost:5000/api/orders \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "items": [
-      { "itemId": "123", "quantity": 2 }
-    ],
-    "deliveryAddress": "123 Main St",
-    "phoneNumber": "555-1234"
-  }'
-```
+- 🐳 Docker containerization (multi-stage builds)**Get Analytics:**
 
-**Get Analytics:**
+- ☸️ Kubernetes-native deployment
 
-```bash
-curl -X GET http://localhost:5000/api/analytics/dashboard \
-  -H "Authorization: Bearer <admin_token>"
-```
+- 🔄 GitOps with ArgoCD (declarative)```bash
 
----
+- 🤖 CI/CD with GitHub Actionscurl -X GET http://localhost:5000/api/analytics/dashboard \
+
+- 📊 Resource management (requests/limits)  -H "Authorization: Bearer <admin_token>"
+
+- 🔐 Secret management```
+
+- 🔍 Health checks and readiness probes
+
+- 📈 Horizontal pod autoscaling (HPA)---
+
+- 🔄 Rolling updates with zero downtime
 
 ## 📁 Project Structure
 
+---
+
 ```
-FOOD-ORDERING-SYS/
+
+## 🚀 Deployment Best PracticesFOOD-ORDERING-SYS/
+
 │
-├── 📁 backend/                           # Node.js REST API
+
+### Environment Management├── 📁 backend/                           # Node.js REST API
+
 │   ├── src/
-│   │   ├── app.js                        # Express setup & middleware
+
+Use Kustomize overlays for environment-specific configurations:│   │   ├── app.js                        # Express setup & middleware
+
 │   │   ├── config/
-│   │   │   └── database.js               # MongoDB connection
-│   │   ├── controllers/                  # Business logic
-│   │   │   ├── authController.js
-│   │   │   ├── menuController.js
-│   │   │   ├── orderController.js
-│   │   │   └── analyticsController.js
-│   │   ├── models/                       # Mongoose schemas
-│   │   │   ├── User.js
-│   │   │   ├── FoodItem.js
-│   │   │   ├── Order.js
-│   │   │   └── AdminSession.js
+
+```│   │   │   └── database.js               # MongoDB connection
+
+kustomize/│   │   ├── controllers/                  # Business logic
+
+├── base/                    # Common configs│   │   │   ├── authController.js
+
+│   ├── backend/│   │   │   ├── menuController.js
+
+│   ├── frontend/│   │   │   ├── orderController.js
+
+│   └── mongodb/│   │   │   └── analyticsController.js
+
+└── overlays/│   │   ├── models/                       # Mongoose schemas
+
+    ├── dev/                 # Development (1 replica, low resources)│   │   │   ├── User.js
+
+    ├── staging/             # Staging (2 replicas, medium resources)│   │   │   ├── FoodItem.js
+
+    └── prod/                # Production (3+ replicas, high resources)│   │   │   ├── Order.js
+
+```│   │   │   └── AdminSession.js
+
 │   │   ├── routes/                       # API endpoints
-│   │   │   ├── auth.js
+
+### Resource Management│   │   │   ├── auth.js
+
 │   │   │   ├── menu.js
-│   │   │   ├── orders.js
-│   │   │   ├── analytics.js
-│   │   │   └── admin.js
-│   │   ├── middleware/
-│   │   │   └── auth.js                   # JWT verification
-│   │   └── services/                     # Helper functions
-│   ├── Dockerfile                        # Container image
-│   ├── package.json                      # Dependencies
-│   └── .env.example                      # Environment template
-│
+
+```yaml│   │   │   ├── orders.js
+
+# Resources for production│   │   │   ├── analytics.js
+
+resources:│   │   │   └── admin.js
+
+  requests:│   │   ├── middleware/
+
+    memory: "512Mi"          # Guaranteed minimum│   │   │   └── auth.js                   # JWT verification
+
+    cpu: "250m"│   │   └── services/                     # Helper functions
+
+  limits:│   ├── Dockerfile                        # Container image
+
+    memory: "1Gi"            # Maximum allowed│   ├── package.json                      # Dependencies
+
+    cpu: "1000m"│   └── .env.example                      # Environment template
+
+```│
+
 ├── 📁 frontend/                          # React Customer App
-│   ├── src/
+
+### Security Best Practices│   ├── src/
+
 │   │   ├── App.jsx                       # Root component
-│   │   ├── pages/                        # Page components
-│   │   │   ├── Landing.jsx
-│   │   │   ├── Menu.jsx
-│   │   │   ├── Cart.jsx
-│   │   │   ├── Orders.jsx
+
+- ✅ Non-root user in containers│   │   ├── pages/                        # Page components
+
+- ✅ Read-only file systems where possible│   │   │   ├── Landing.jsx
+
+- ✅ Network policies for pod-to-pod communication│   │   │   ├── Menu.jsx
+
+- ✅ RBAC for Kubernetes access control│   │   │   ├── Cart.jsx
+
+- ✅ Secret encryption in etcd│   │   │   ├── Orders.jsx
+
 │   │   │   ├── Login.jsx
-│   │   │   └── Register.jsx
+
+---│   │   │   └── Register.jsx
+
 │   │   ├── components/                   # Reusable components
-│   │   ├── services/
+
+## 🔮 Future Improvements│   │   ├── services/
+
 │   │   │   └── api.js                    # Axios configuration
-│   │   ├── context/                      # State management
-│   │   │   ├── AuthContext.jsx
-│   │   │   └── CartContext.jsx
-│   │   └── utils/                        # Helper functions
-│   ├── Dockerfile                        # Multi-stage build
-│   ├── nginx.conf                        # Reverse proxy config
-│   ├── package.json
-│   └── vite.config.js                    # Build configuration
-│
-├── 📁 admin-panel/                       # React Admin Dashboard
-│   ├── src/
-│   │   ├── App.jsx
+
+- [ ] Real-time order notifications (WebSocket)│   │   ├── context/                      # State management
+
+- [ ] Payment gateway integration (Stripe, PayPal)│   │   │   ├── AuthContext.jsx
+
+- [ ] Email verification for user signup│   │   │   └── CartContext.jsx
+
+- [ ] SMS notifications for orders│   │   └── utils/                        # Helper functions
+
+- [ ] Advanced analytics (ML recommendations)│   ├── Dockerfile                        # Multi-stage build
+
+- [ ] Multi-language support (i18n)│   ├── nginx.conf                        # Reverse proxy config
+
+- [ ] Mobile app (React Native)│   ├── package.json
+
+- [ ] Service mesh (Istio) for advanced networking│   └── vite.config.js                    # Build configuration
+
+- [ ] Helm charts for package management│
+
+- [ ] Multi-region deployment with disaster recovery├── 📁 admin-panel/                       # React Admin Dashboard
+
+- [ ] API rate limiting and throttling│   ├── src/
+
+- [ ] GraphQL API support│   │   ├── App.jsx
+
 │   │   ├── pages/
-│   │   │   ├── Dashboard.jsx             # Analytics & overview
+
+---│   │   │   ├── Dashboard.jsx             # Analytics & overview
+
 │   │   │   ├── FoodItems.jsx             # Menu management
-│   │   │   ├── Orders.jsx                # Order management
+
+## 🎓 Learning Highlights│   │   │   ├── Orders.jsx                # Order management
+
 │   │   │   └── Login.jsx
-│   │   ├── components/
+
+This project demonstrates:│   │   ├── components/
+
 │   │   │   ├── Sidebar.jsx
-│   │   │   ├── ProtectedRoute.jsx
-│   │   │   └── AdminLayout.jsx
-│   │   ├── services/
-│   │   │   └── api.js                    # Admin API client
-│   │   └── context/
-│   │       └── AuthContext.jsx           # Admin auth
-│   ├── Dockerfile
+
+- **Microservices Architecture**: Decoupled, independently deployable services│   │   │   ├── ProtectedRoute.jsx
+
+- **GitOps Principles**: Git as single source of truth│   │   │   └── AdminLayout.jsx
+
+- **Infrastructure as Code**: Declarative Kubernetes manifests│   │   ├── services/
+
+- **CI/CD Best Practices**: Automated build, test, push, deploy│   │   │   └── api.js                    # Admin API client
+
+- **Container Orchestration**: Kubernetes deployment patterns│   │   └── context/
+
+- **Cloud-Native Design**: 12-factor app methodology│   │       └── AuthContext.jsx           # Admin auth
+
+- **DevOps Culture**: Automation, monitoring, continuous improvement│   ├── Dockerfile
+
 │   ├── nginx.conf
-│   ├── package.json
+
+---│   ├── package.json
+
 │   └── vite.config.js
-│
+
+## 🤝 Contributing│
+
 ├── 📁 mysql/                             # Database initialization
-│   ├── Dockerfile
+
+We welcome contributions! Please follow these steps:│   ├── Dockerfile
+
 │   └── init.sql                          # Schema (for reference)
-│
-├── 📁 k8s/                               # Kubernetes manifests
-│   ├── namespace.yml
-│   ├── secret.yml
-│   ├── mongodb-pvc.yml
+
+1. **Fork** the repository│
+
+2. **Create** a feature branch: `git checkout -b feature/amazing-feature`├── 📁 k8s/                               # Kubernetes manifests
+
+3. **Commit** changes: `git commit -m 'Add amazing feature'`│   ├── namespace.yml
+
+4. **Push** to branch: `git push origin feature/amazing-feature`│   ├── secret.yml
+
+5. **Open** a Pull Request│   ├── mongodb-pvc.yml
+
 │   ├── mongodb-deployment.yml
-│   ├── mongodb-service.yml
-│   ├── backend-deployment.yml
-│   ├── backend-service.yml
-│   ├── frontend-deployment.yml
-│   ├── frontend-service.yml
+
+### Code Standards│   ├── mongodb-service.yml
+
+- Follow existing code style│   ├── backend-deployment.yml
+
+- Add tests for new features│   ├── backend-service.yml
+
+- Update documentation│   ├── frontend-deployment.yml
+
+- Test locally before pushing│   ├── frontend-service.yml
+
 │   ├── admin-panel-deployment.yml
-│   └── admin-panel-service.yml
+
+---│   └── admin-panel-service.yml
+
 │
-├── docker-compose.yml                    # Docker Compose orchestration
+
+## 📝 License├── docker-compose.yml                    # Docker Compose orchestration
+
 ├── Jenkinsfile                           # CI/CD pipeline
-├── .gitignore                            # Git ignore rules
+
+This project is licensed under the ISC License.├── .gitignore                            # Git ignore rules
+
 ├── README.md                             # This file
-└── .env.example                          # Environment variables template
+
+---└── .env.example                          # Environment variables template
+
 ```
+
+## 👤 Author
 
 ### Key Directories Explained
 
+**Jenish Chauhan**
+
 | Directory      | Purpose              | Technology                |
-| -------------- | -------------------- | ------------------------- |
-| `/backend`     | REST API server      | Node.js, Express, MongoDB |
+
+- GitHub: [@jenish-chauhan](https://github.com/jenish-chauhan)| -------------- | -------------------- | ------------------------- |
+
+- Email: jenishchauhan.08@gmail.com| `/backend`     | REST API server      | Node.js, Express, MongoDB |
+
 | `/frontend`    | Customer application | React, Vite, Tailwind     |
-| `/admin-panel` | Admin dashboard      | React, Vite, Recharts     |
+
+---| `/admin-panel` | Admin dashboard      | React, Vite, Recharts     |
+
 | `/k8s`         | Kubernetes configs   | K8s manifests, YAML       |
-| `/mysql`       | Database setup       | MongoDB initialization    |
 
----
+## 📞 Support| `/mysql`       | Database setup       | MongoDB initialization    |
 
-## 🔐 Security Features
+
+
+For support, please:---
+
+1. Open a GitHub issue
+
+2. Check existing documentation## 🔐 Security Features
+
+3. Review troubleshooting section in LOCAL-DEVELOPMENT-GUIDE.md
 
 ### Authentication & Authorization
 
+---
+
 - ✅ **JWT Token-based**: Stateless authentication
-- ✅ **Password Hashing**: bcrypt with salt rounds
+
+## 🎯 Quick Reference- ✅ **Password Hashing**: bcrypt with salt rounds
+
 - ✅ **Protected Routes**: Middleware-based access control
-- ✅ **Admin Verification**: Separate admin authentication
 
-### Network Security
+### Common Commands- ✅ **Admin Verification**: Separate admin authentication
 
-- ✅ **CORS Configuration**: Whitelist allowed origins
-- ✅ **HTTPS Ready**: SSL/TLS support via Nginx
-- ✅ **Input Validation**: express-validator on all endpoints
+
+
+```bash### Network Security
+
+# Docker Compose
+
+docker-compose up --build -d- ✅ **CORS Configuration**: Whitelist allowed origins
+
+docker-compose down- ✅ **HTTPS Ready**: SSL/TLS support via Nginx
+
+docker-compose logs -f- ✅ **Input Validation**: express-validator on all endpoints
+
 - ✅ **Rate Limiting**: Ready for integration
 
-### Containerization Security
+# Kubernetes
 
-- ✅ **Non-root User**: Containers run as `appuser`
+kubectl apply -k kustomize/overlays/prod### Containerization Security
+
+kubectl get all -n food-ordering
+
+kubectl logs -f deployment/backend -n food-ordering- ✅ **Non-root User**: Containers run as `appuser`
+
 - ✅ **Alpine Images**: Minimal attack surface
-- ✅ **Health Checks**: Automatic recovery
-- ✅ **Secret Management**: Environment-based secrets
 
-### Environment Variables
+# ArgoCD- ✅ **Health Checks**: Automatic recovery
 
-```bash
-# Secrets (never commit)
-JWT_SECRET=your_secure_jwt_secret
-MONGO_PASSWORD=your_secure_mongo_password
-ADMIN_PASSWORD=secure_admin_password
+argocd app list- ✅ **Secret Management**: Environment-based secrets
 
-# Configuration
-PORT=5000
-NODE_ENV=production
-MONGO_URI=mongodb://...
-FRONTEND_URL=http://localhost:5173,http://localhost:8080
+argocd app sync food-ordering-prod
+
+argocd app rollback food-ordering-prod### Environment Variables
+
 ```
 
----
+```bash
+
+### Service Endpoints# Secrets (never commit)
+
+JWT_SECRET=your_secure_jwt_secret
+
+| Service | Local | Docker | K8s |MONGO_PASSWORD=your_secure_mongo_password
+
+|---------|-------|--------|-----|ADMIN_PASSWORD=secure_admin_password
+
+| Frontend | localhost:5173 | localhost:5173 | LoadBalancer:80 |
+
+| Backend | localhost:5000 | localhost:5000 | LoadBalancer:5000 |# Configuration
+
+| Admin | localhost:5174 | localhost:8080 | LoadBalancer:8080 |PORT=5000
+
+| MongoDB | localhost:27017 | mongodb:27017 | mongodb:27017 |NODE_ENV=production
+
+MONGO_URI=mongodb://...
+
+---FRONTEND_URL=http://localhost:5173,http://localhost:8080
+
+```
+
+**Last Updated**: April 15, 2024
+
+**Version**: 2.0.0 - GitOps Edition  ---
+
+**Status**: Production Ready ✅
 
 ## 📊 Performance & Scalability
 
+---
+
 ### Performance Characteristics
+
+🚀 **Ready to deploy? Start with `docker-compose up --build -d` or follow the [Kubernetes Deployment](#3-kubernetes-deployment-production) guide!**
 
 | Metric              | Value   | Notes                |
 | ------------------- | ------- | -------------------- |
@@ -1083,3 +1853,4 @@ kubectl apply -f k8s/
 ---
 
 🚀 **Ready to get started? Run `docker-compose up --build -d` and visit http://localhost:5173!**
+````
