@@ -38,14 +38,14 @@ README-FOR-DOCKER.MD
 # ---------- Package lock (optional — uncomment if you prefer) ----------
 # package-lock.json
 
-*.md
+# ---------- Documentation files (local only — do NOT push to GitHub) ----------
 CHANGES.md 
 COMPLETE-APPLICATION-GUIDE.md 
 COMPLETE.md 
 docker-command-readme.md 
 INDEX.md 
 LOCAL-DEVELOPMENT-GUIDE.md 
-README.md
+
 MIGRATION.md
 QUICK-START-SCRIPTS.md
 READ-ME-FIRST.md
